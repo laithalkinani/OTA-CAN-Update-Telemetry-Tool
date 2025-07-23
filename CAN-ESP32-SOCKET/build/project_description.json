@@ -1,7 +1,7 @@
 {
     "version":            "1.2",
     "project_name":       "CAN-ESP32-SOCKET",
-    "project_version":    "ea254ce",
+    "project_version":    "e2c80b0-dirty",
     "project_path":       "C:/Users/HP/OneDrive - University of Windsor/Desktop/Capstone/CAN-Telemetry/CAN-ESP32-SOCKET",
     "idf_path":           "C:/Users/HP/Desktop/v5.5-rc1/esp-idf",
     "build_dir":          "C:/Users/HP/OneDrive - University of Windsor/Desktop/Capstone/CAN-Telemetry/CAN-ESP32-SOCKET/build",
@@ -700,7 +700,7 @@
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "C:/Users/HP/OneDrive - University of Windsor/Desktop/Capstone/CAN-Telemetry/CAN-ESP32-SOCKET/build/esp-idf/main/libmain.a",
-            "sources": [ "C:/Users/HP/OneDrive - University of Windsor/Desktop/Capstone/CAN-Telemetry/CAN-ESP32-SOCKET/main/hello_world_main.c" ],
+            "sources": [ "C:/Users/HP/OneDrive - University of Windsor/Desktop/Capstone/CAN-Telemetry/CAN-ESP32-SOCKET/main/app_main.c" ],
             "include_dirs": []
         },
         "mbedtls": {

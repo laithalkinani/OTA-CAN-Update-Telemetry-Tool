@@ -1,0 +1,47 @@
+#.gitignore for ESP-IDF template
+#straight up just asked chat for this
+
+# ESP-IDF build output
+/build/
+*.elf
+*.map
+*.bin
+*.hex
+*.img
+
+# CMake-generated files
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# ESP-IDF configuration
+sdkconfig
+sdkconfig.old
+
+# Partition tables (auto-generated)
+partition_table*.csv
+
+# Python cache and build environment
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Editor/IDE settings (optional, for VSCode/CLion)
+.vscode/
+.idea/
+
+# Backup, swap, and temp files
+*~
+*.swp
+*.swo
+*.bak
+*.tmp
+*.orig
+*.rej
+
+# ESP-IDF component manager (if you use it)
+dependencies.lock

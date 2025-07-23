@@ -16,6 +16,10 @@
 #include "driver/gpio.h"
 #include "hal/gpio_types.h"
 #include "soc/gpio_num.h"
+#include "mcp2515.h"
+#include "can_stuff.h"
+#include "wifi_stuff.h"
+
 
 #define GREEN_LED 13
 #define BLUE_LED 26

@@ -1,56 +1,6 @@
-#.gitignore for ESP-IDF
-#straight up asked chat for this but only after some unnecessary files were already committed lol
+#.gitignore
 
-# ESP-IDF build output and artifacts
-/build/
-*.elf
-*.map
-*.bin
-*.hex
-*.img
-*.a                  # Static library files generated during build
 
-# Ninja build system files
-build.ninja
-.ninja_log
-.ninja_deps
-
-# ESP-IDF build timestamp files
-.bin_timestamp
-
-# CMake-generated files
-CMakeFiles/
-CMakeCache.txt
-cmake-build-*/
-cmake_install.cmake
-Makefile
-compile_commands.json
-
-# ESP-IDF configuration files
+build/
 sdkconfig
 sdkconfig.old
-
-# Partition tables (auto-generated)
-partition_table*.csv
-
-# Python cache and build environment
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Editor/IDE settings (optional)
-.vscode/
-.idea/
-
-# Backup, swap, and temporary files
-*~
-*.swp
-*.swo
-*.bak
-*.tmp
-*.orig
-*.rej
-
-# ESP-IDF component manager (if you use it)
-dependencies.lock

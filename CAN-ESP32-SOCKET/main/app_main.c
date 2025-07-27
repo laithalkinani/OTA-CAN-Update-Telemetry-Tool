@@ -20,12 +20,13 @@
 
 void app_main(void)
 {
-    
+
+
 xTaskCreatePinnedToCore 
 (
     CAN_Polling,
     "Polling for CAN...",
-    4096,
+    2048,
     NULL,
     1,
     NULL,

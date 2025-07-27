@@ -18,13 +18,14 @@
 #define     MISO_PIN    27
 #define     CS_PIN      26
 #define     INT_PIN     25
+#define     LED         2   //for debugging
 
-#define     ESP_HOST    VSPI_HOST
+#define     ESP_HOST    HSPI_HOST
 
 
 /***********SPI FUNCTION PROTOTYPES**********/
 
-void SPI_Init(void);
+bool SPI_Init(void);
 
 
 /***********CAN FUNCTION PROTOTYPES**********/

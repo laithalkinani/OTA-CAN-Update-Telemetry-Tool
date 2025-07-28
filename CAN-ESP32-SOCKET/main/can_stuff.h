@@ -13,14 +13,14 @@
 /*****************SPI MACROS********************/
 
 
-#define     SCK_PIN     13
-#define     MOSI_PIN    14
-#define     MISO_PIN    27
-#define     CS_PIN      26
-#define     INT_PIN     25
+#define     SCK_PIN     18
+#define     MOSI_PIN    23
+#define     MISO_PIN    19
+#define     CS_PIN      5
+#define     INT_PIN     4
 #define     LED         2   //for debugging
 
-#define     ESP_HOST    HSPI_HOST
+#define     ESP_HOST    VSPI_HOST
 
 
 /***********SPI FUNCTION PROTOTYPES**********/

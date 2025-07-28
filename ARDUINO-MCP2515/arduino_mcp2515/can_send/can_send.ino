@@ -8,7 +8,7 @@ CANConfig config(CAN_BITRATE, CAN_PIN_CS, CAN_PIN_INT, SPI, CAN_SPI_HZ);
 
 CANController CAN(config);
 
-uint8_t data[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07 };
+uint8_t data[] = { 'h', 'e', 'l', 'l', 'o' };
 
 void setup() {
   Serial.begin(115200);
@@ -47,8 +47,7 @@ void loop() {
   // Optional: echo back frame to serial (verifies what was sent)
   frame.print("Echoed TX Frame");
 
-  // Modify data for next send
-  data[0] += 1;
+
 
   delay(2000);
 }

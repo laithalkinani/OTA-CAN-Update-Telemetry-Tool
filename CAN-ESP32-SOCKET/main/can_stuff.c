@@ -88,8 +88,11 @@ bool SPI_Init(void)
     MCP2515_init();
     SPI_Init();
     MCP2515_reset();
-    MCP2515_setBitrate(CAN_125KBPS, MCP_8MHZ); //125 KBS bit rate
+    MCP2515_setBitrate(CAN_500KBPS, MCP_8MHZ); //500 KBS bit rate
     MCP2515_setNormalMode();
+    ESP_LOGI(TAG, "Reading CANCTRL: 0x%02X", MCP2515_readRegister(MCP_CANCTRL));
+    ESP_LOGI(TAG, "Reading CANSTAT: 0x%02X", MCP2515_readRegister(MCP_CANSTAT));
+
 
     //Mask/Filtering: can make this another function later
     MCP2515_setFilterMask(MASK0, false, 0x000);  // accept everything
@@ -131,49 +134,37 @@ bool SPI_Init(void)
     // //The naming is soo confusing here ngl 
     struct can_frame frame_struct;   //actual frame
     CAN_FRAME frame = &frame_struct; //pointer to pass the frame
-    CAN_Init();
-    ESP_LOGI(TAG, "GET STATUS: 0x%02X", MCP2515_getStatus());
-    // MCP2515_reset();
-    ESP_LOGI(TAG, "SECOND GET STATUS: 0x%02X", MCP2515_getStatus());
 
-    
+    CAN_Init();
+
+    //bunch of diagnostics
+    ESP_LOGI(TAG, "GET STATUS: 0x%02X", MCP2515_getStatus());
+    ESP_LOGI(TAG, "CHECK MSG RECEIVE: %d", (uint32_t)MCP2515_readMessageAfterStatCheck(frame));
+    ESP_LOGI(TAG, "FRAME ID: 0x%08X", (unsigned int long)frame->can_id);
+    ESP_LOGI(TAG, "DLC: %d", frame->can_dlc);
+
+    char ascii_str[CAN_MAX_DLEN + 1] = {0};  //+1 for null terminator
+    memcpy(ascii_str, frame->data, frame->can_dlc); //copy frame->data into asciistr
+    ascii_str[frame->can_dlc] = '\0'; //add null terminator
+    ESP_LOGI(TAG, "DATA (ASCII): %s", ascii_str); //should say hello
+
+    if (gpio_get_level(INT_PIN) != 0)
+    {
+        ESP_LOGI(TAG, "INT NOT PULLED LOW");
+    }
+    else
+    {
+        ESP_LOGI(TAG, "INT PULLED LOW SUCCESSFULLY.");
+    }
+
 
     while(1) //TODO: be careful having a while(1) loop here... 
     //Because what if you have a while(1) loop running for the wifi stuff?
     //Now you have to use both cores.
     {
-        //    ESP_LOGI(TAG, "THIS WORKS %p", MCP2515_Object->spi);
-
-        if (gpio_get_level(INT_PIN) == 0) 
-        {
-            ESP_LOGI(TAG, "INT pin pulled low, checking for CAN frame...");
-            if (MCP2515_readMessageAfterStatCheck(frame) == ERROR_OK)
-            {
-                ESP_LOGI(TAG,"CAN ID: 0x%X, DLC: %d, Data: ", (uint8_t)frame->can_id, frame->can_dlc);
-                char str[frame->can_dlc + 1]; //length of data + null terminator
-                for (uint8_t i = 0; i < frame->can_dlc; i++)
-                {
-                    str[i] = frame->data[i];
-                }
-                str[frame->can_dlc] = '\0'; //null terminate it
-
-                ESP_LOGI(TAG,"\n Received: %s\n", str);
-
-            }
-            else 
-            {
-                ESP_LOGI(TAG, "ERROR NOT OK?");
-            }
-        }
-
-        else 
-        {
-            ESP_LOGI(TAG, "INT NEVER PULLED LOW");
-        }
-
         vTaskDelay(pdMS_TO_TICKS(10)); //delay for polling.
 
-  }
+    }
 }
  
 

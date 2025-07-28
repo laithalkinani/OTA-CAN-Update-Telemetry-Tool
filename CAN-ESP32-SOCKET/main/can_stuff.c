@@ -56,11 +56,11 @@ bool SPI_Init(void)
 
     ret = spi_bus_add_device(ESP_HOST, &dev_cfg, &MCP2515_Object->spi);
     ESP_ERROR_CHECK(ret);
+    ESP_LOGI(TAG, "SPI BUS INIT AND DEVICE ADDED");
+    ESP_LOGI(TAG, "SPI HANDLE: %p \n", MCP2515_Object->spi);
 
     return true;
 
-    ESP_LOGI(TAG, "SPI BUS INIT AND DEVICE ADDED");
-    printf("SPI HANDLE: %p \n", MCP2515_Object->spi);
 }
 
 
@@ -105,11 +105,11 @@ bool SPI_Init(void)
     //try this
 
 
-    //set gpio /INT pin as input 
+    //set gpio /INT pin as input (PULLED UP)
     gpio_config_t io_conf = {
         .pin_bit_mask = (1ULL << INT_PIN),
         .mode = GPIO_MODE_INPUT,
-        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE,
     };
@@ -132,6 +132,10 @@ bool SPI_Init(void)
     struct can_frame frame_struct;   //actual frame
     CAN_FRAME frame = &frame_struct; //pointer to pass the frame
     CAN_Init();
+    ESP_LOGI(TAG, "GET STATUS: 0x%02X", MCP2515_getStatus());
+    // MCP2515_reset();
+    ESP_LOGI(TAG, "SECOND GET STATUS: 0x%02X", MCP2515_getStatus());
+
     
 
     while(1) //TODO: be careful having a while(1) loop here... 
@@ -139,14 +143,13 @@ bool SPI_Init(void)
     //Now you have to use both cores.
     {
         //    ESP_LOGI(TAG, "THIS WORKS %p", MCP2515_Object->spi);
-           
 
         if (gpio_get_level(INT_PIN) == 0) 
         {
             ESP_LOGI(TAG, "INT pin pulled low, checking for CAN frame...");
             if (MCP2515_readMessageAfterStatCheck(frame) == ERROR_OK)
             {
-                printf("CAN ID: 0x%X, DLC: %d, Data: ", (uint8_t)frame->can_id, frame->can_dlc);
+                ESP_LOGI(TAG,"CAN ID: 0x%X, DLC: %d, Data: ", (uint8_t)frame->can_id, frame->can_dlc);
                 char str[frame->can_dlc + 1]; //length of data + null terminator
                 for (uint8_t i = 0; i < frame->can_dlc; i++)
                 {
@@ -154,8 +157,12 @@ bool SPI_Init(void)
                 }
                 str[frame->can_dlc] = '\0'; //null terminate it
 
-                printf("\n Received: %s\n", str);
+                ESP_LOGI(TAG,"\n Received: %s\n", str);
 
+            }
+            else 
+            {
+                ESP_LOGI(TAG, "ERROR NOT OK?");
             }
         }
 

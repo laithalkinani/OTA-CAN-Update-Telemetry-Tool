@@ -67,7 +67,7 @@ bool SPI_Init(void)
  void CAN_Init(void)
  {
 
-       // Initialize LED GPIO for debugging
+       //initialize the LED onboard the ESP32 devkit for debugging
     gpio_config_t led_conf = {
         .pin_bit_mask = (1ULL << LED),
         .mode = GPIO_MODE_OUTPUT,
@@ -77,7 +77,7 @@ bool SPI_Init(void)
     };
     gpio_config(&led_conf);
 
-    // Blink LED 3 times to confirm board is alive
+    //blink LED 3 times to confirm board is alive
     for (int i = 0; i < 3; i++) {
         gpio_set_level(LED, 1);
         vTaskDelay(pdMS_TO_TICKS(500));
@@ -85,12 +85,12 @@ bool SPI_Init(void)
         vTaskDelay(pdMS_TO_TICKS(500));
     }
 
-    MCP2515_init();
+    MCP2515_init();     //creates MCP2515 object
     SPI_Init();
-    MCP2515_reset();
-    MCP2515_setBitrate(CAN_500KBPS, MCP_8MHZ); //500 KBS bit rate
+    MCP2515_reset();    //clears any buffers
+    MCP2515_setBitrate(CAN_500KBPS, MCP_8MHZ);      //500 KBS bit rate
     MCP2515_setNormalMode();
-    ESP_LOGI(TAG, "Reading CANCTRL: 0x%02X", MCP2515_readRegister(MCP_CANCTRL));
+    ESP_LOGI(TAG, "Reading CANCTRL: 0x%02X", MCP2515_readRegister(MCP_CANCTRL)); //diagnostics
     ESP_LOGI(TAG, "Reading CANSTAT: 0x%02X", MCP2515_readRegister(MCP_CANSTAT));
 
 
@@ -105,7 +105,6 @@ bool SPI_Init(void)
     MCP2515_setFilter(4, false, 0x000);
     MCP2515_setFilter(5, false, 0x000);
 
-    //try this
 
 
     //set gpio /INT pin as input (PULLED UP)
@@ -136,6 +135,14 @@ bool SPI_Init(void)
     CAN_FRAME frame = &frame_struct; //pointer to pass the frame
 
     CAN_Init();
+    MCP2515_readMessageAfterStatCheck(frame);
+  
+    ESP_LOGI(TAG, "RX STATUS: %d",MCP2515_checkReceive());
+    uint8_t intf = MCP2515_readRegister(MCP_CANINTF);
+    ESP_LOGI(TAG, "CANINTF after clear: 0x%02X", intf);
+    ESP_LOGI(TAG, "CHECK ERRORS: 0x%02X", MCP2515_checkError());
+    ESP_LOGI(TAG, "ANY ERRORS: 0x%02X", MCP2515_getErrorFlags());
+    
 
     //bunch of diagnostics
     ESP_LOGI(TAG, "GET STATUS: 0x%02X", MCP2515_getStatus());
@@ -144,19 +151,25 @@ bool SPI_Init(void)
     ESP_LOGI(TAG, "DLC: %d", frame->can_dlc);
 
     char ascii_str[CAN_MAX_DLEN + 1] = {0};  //+1 for null terminator
-    memcpy(ascii_str, frame->data, frame->can_dlc); //copy frame->data into asciistr
-    ascii_str[frame->can_dlc] = '\0'; //add null terminator
+    memcpy(ascii_str, frame->data, frame->can_dlc); //copy frame->data into ascii_str (in general memcpy is not good, just for testing here)
+    ascii_str[frame->can_dlc] = '\0'; //add null terminator for C string, hello \0
     ESP_LOGI(TAG, "DATA (ASCII): %s", ascii_str); //should say hello
 
     if (gpio_get_level(INT_PIN) != 0)
     {
-        ESP_LOGI(TAG, "INT NOT PULLED LOW");
+        ESP_LOGI(TAG, "INT NOT PULLED LOW. RX FAIL.");
     }
     else
     {
         ESP_LOGI(TAG, "INT PULLED LOW SUCCESSFULLY.");
     }
 
+
+
+
+            //Next steps: figure out how to do this repeatedly, aka clear
+            //the RXbuffer to make room for the next msg?
+            //figure out how this is done
 
     while(1) //TODO: be careful having a while(1) loop here... 
     //Because what if you have a while(1) loop running for the wifi stuff?

@@ -12,7 +12,7 @@ uint8_t data[] = { 'h', 'e', 'l', 'l', 'o' };
 
 void setup() {
   Serial.begin(115200);
-  delay(1000);  // Allow time for serial monitor to start
+  delay(1000);
   Serial.println("Initializing CAN...");
 
   while (CAN.begin(CANController::Mode::Normal) != CANController::OK) {
@@ -23,7 +23,6 @@ void setup() {
 }
 
 void loop() {
-  // Create and send CAN frame
   CANFrame frame(0x100, data, sizeof(data));
 
   Serial.print("[INFO] Attempting to send CAN frame: ");
@@ -32,7 +31,6 @@ void loop() {
     Serial.print(data[i], HEX);
     Serial.print(i < sizeof(data) - 1 ? " " : "");
   }
-
   Serial.println();
 
   CANController::IOResult result = CAN.write(frame);
@@ -42,12 +40,23 @@ void loop() {
   } else {
     Serial.print("[FAIL] Failed to send frame. Error code: ");
     Serial.println(static_cast<int>(result));
+
+    CANErrors errs = CAN.getErrors();
+    Serial.print("ERROR TX COUNT: ");
+    Serial.println(errs.errorCountTx);
+    Serial.print("ERROR RX COUNT: ");
+    Serial.println(errs.errorCountRx);
+    Serial.print("ERROR FLAGS: 0b");
+    Serial.println(errs.errorFlags, BIN);
+    Serial.print("TXB0 FLAGS: 0b");
+    Serial.println(errs.txb0Flags, BIN);
+    Serial.print("TXB1 FLAGS: 0b");
+    Serial.println(errs.txb1Flags, BIN);
+    Serial.print("TXB2 FLAGS: 0b");
+    Serial.println(errs.txb2Flags, BIN);
   }
 
-  // Optional: echo back frame to serial (verifies what was sent)
   frame.print("Echoed TX Frame");
-
-
 
   delay(2000);
 }

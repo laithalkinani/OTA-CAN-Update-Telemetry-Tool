@@ -8,7 +8,7 @@ CANConfig config(CAN_BITRATE, CAN_PIN_CS, CAN_PIN_INT, SPI, CAN_SPI_HZ);
 
 CANController CAN(config);
 
-uint8_t data[] = { 'h', 'e', 'l', 'l', 'o' };
+uint8_t data[] = { 'l', 'a', 'i', 't', 'h' };
 
 void setup() {
   Serial.begin(115200);

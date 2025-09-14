@@ -91,7 +91,9 @@ bool SPI_Init(void)
     MCP2515_setBitrate(CAN_500KBPS, MCP_8MHZ);      //500 KBS bit rate
     MCP2515_setNormalMode();
     ESP_LOGI(TAG, "Reading CANCTRL: 0x%02X", MCP2515_readRegister(MCP_CANCTRL)); //diagnostics
+    //CANCTRL = 0x07 means normal operation mode enabled, sysclk/8, CLKOUT pin enabled
     ESP_LOGI(TAG, "Reading CANSTAT: 0x%02X", MCP2515_readRegister(MCP_CANSTAT));
+    //CANCTRL = 0x0C means RXB0 interrupt which is good. 0x02 means error interrupt.
 
 
     //Mask/Filtering: can make this another function later
@@ -140,6 +142,7 @@ bool SPI_Init(void)
     ESP_LOGI(TAG, "RX STATUS: %d",MCP2515_checkReceive());
     uint8_t intf = MCP2515_readRegister(MCP_CANINTF);
     ESP_LOGI(TAG, "CANINTF after clear: 0x%02X", intf);
+    //CANINTF = 0x02 means int flag on RXB1
     ESP_LOGI(TAG, "CHECK ERRORS: 0x%02X", MCP2515_checkError());
     ESP_LOGI(TAG, "ANY ERRORS: 0x%02X", MCP2515_getErrorFlags());
     

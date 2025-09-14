@@ -15,7 +15,10 @@ Author: Laith Al-Kinani
 
 void tcp_client(void *arg)
 {
-    
+    while(1)
+    {
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
 }
 
 

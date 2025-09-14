@@ -7,7 +7,7 @@ Author: Laith Al-Kinani
 #ifndef WIFI_STUFF_H
 #define WIFI_STUFF_H
 
-void tcp_cleint(void *arg);
+void tcp_client(void *arg);
 
 
 

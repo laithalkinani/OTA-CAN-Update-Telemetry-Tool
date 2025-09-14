@@ -44,5 +44,17 @@ xTaskCreatePinnedToCore
 
 //pin the wifi stuff to core 1
 
+xTaskCreatePinnedToCore
+(
+    tcp_client,
+    "Setting up TCP Client...",
+    4096,
+    NULL,
+    1,
+    NULL,
+    1
+
+);
+
 
 }

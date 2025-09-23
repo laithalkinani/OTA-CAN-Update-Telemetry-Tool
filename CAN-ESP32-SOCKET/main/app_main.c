@@ -52,7 +52,7 @@ xTaskCreatePinnedToCore
     NULL,
     1,
     NULL,
-    1
+    1 //core 1
 
 );
 

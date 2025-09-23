@@ -13,12 +13,19 @@
  #include <stdio.h>
  #include <stdbool.h>
  #include "can_stuff.h"
- #include "can.h"
  #include "mcp2515.h"
  #include "driver/spi_master.h"
  #include "driver/gpio.h"
  #include "esp_err.h"
  #include "esp_log.h"
+
+ /******GLOBALS************** */
+
+ char ascii_str[CAN_MAX_DLEN + 1] = {0};  //+1 for null terminator
+ //this is eventually going to be shared memory with core 1
+ //so we need to set up the binary semaphore eventually...
+ //write to this buffer while it's unlocked, soon as it's done, lock it
+ //when it's locked, let tcp client send it
 
  /***************SPI HANDLERS**********/
 
@@ -133,6 +140,7 @@ bool SPI_Init(void)
   void CAN_Polling(void *arg)
   {
     // //The naming is soo confusing here ngl 
+    //Basically just creating a pointer to reference a struct.
     struct can_frame frame_struct;   //actual frame
     CAN_FRAME frame = &frame_struct; //pointer to pass the frame
 
@@ -153,7 +161,7 @@ bool SPI_Init(void)
     ESP_LOGI(TAG, "FRAME ID: 0x%08X", (unsigned int long)frame->can_id);
     ESP_LOGI(TAG, "DLC: %d", frame->can_dlc);
 
-    char ascii_str[CAN_MAX_DLEN + 1] = {0};  //+1 for null terminator
+    
     memcpy(ascii_str, frame->data, frame->can_dlc); //copy frame->data into ascii_str (in general memcpy is not good, just for testing here)
     ascii_str[frame->can_dlc] = '\0'; //add null terminator for C string, hello \0
     ESP_LOGI(TAG, "DATA (ASCII): %s", ascii_str); //should say hello

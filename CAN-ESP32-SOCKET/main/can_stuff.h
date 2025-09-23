@@ -1,6 +1,7 @@
 #ifndef CAN_STUFF_H
 #define CAN_STUFF_H
 
+
 /**
  * 
  * can_stuff_h
@@ -8,6 +9,8 @@
  * 
  **/ 
 
+#include "can.h"
+#include <stdbool.h>
 
 
 /*****************SPI MACROS********************/
@@ -21,6 +24,8 @@
 #define     LED         2   //for debugging
 
 #define     ESP_HOST    VSPI_HOST
+
+extern char ascii_str[CAN_MAX_DLEN + 1];
 
 
 /***********SPI FUNCTION PROTOTYPES**********/

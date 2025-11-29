@@ -22,7 +22,11 @@ esp_err_t createClient(void)
     //init the socket address/port/stream 
 
     esp_err_t err = ESP_FAIL;
-    char *payload = ascii_str; //this should be the CAN package
+    //TODO: no semaphore stuff here yet. just send any payload over TCP to validate that it works
+
+
+    //TODO: change this to just some string like "foo" to validate CAN-TCP connection
+    char *payload = "foo"; //this should be the CAN package
     //you may have to cast the can package to const char* later
     //just be careful because this is shared resource with core 0
     //so this will be a binary semaphore later
@@ -40,7 +44,7 @@ esp_err_t createClient(void)
         return err;
     }
 
-    ESP_LOGI(WIFI_TAG, "Socket created, connected to %s:%d" HOST_IP, PORT);
+    ESP_LOGI(WIFI_TAG, "Socket created, connecting to %s:%d", HOST_IP, PORT);
 
     int ret = connect(sock, (struct sockaddr*)&dest_addr, sizeof(dest_addr)); //bind socket to port
     if (ret != 0)

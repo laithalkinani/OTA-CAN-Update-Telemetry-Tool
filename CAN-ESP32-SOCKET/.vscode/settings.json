@@ -23,5 +23,6 @@
     "esp_log.h": "c",
     "esp_err.h": "c",
     "functional": "c"
-  }
+  },
+  "idf.port": "/dev/tty.usbserial-0001"
 }

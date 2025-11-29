@@ -22,6 +22,9 @@
 Brief: core 0 runs the can stuff, core 1 runs the wifi stuff. 
 We run some error checks on the network init first, then we run
 the CAN RX logic and the TCP client logic concurrently.
+
+UPDATE: want to try running all can-tcp stuff on core 0 and all tcp-can stuff on core 1 (bidirectional)
+with hardware synchronization on the CAN bus itself
 */
 
 void app_main(void)

@@ -1,0 +1,70 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.0.3 Chrome/140.0.7339.249 Electron/38.7.0 Safari/537.36" version="29.0.3">
+  <diagram name="Page-1" id="wv5YqMv82fRc6kJwJGx6">
+    <mxGraphModel dx="1765" dy="1293" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-1" value="&lt;font style=&quot;font-size: 21px;&quot;&gt;Bidirectional TCP-CAN Bridge&lt;/font&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="390" y="210" width="320" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-3" value="&lt;div&gt;CAN&lt;/div&gt;&lt;div&gt;Bus&lt;/div&gt;" style="shape=doubleArrow;whiteSpace=wrap;html=1;direction=south;" vertex="1" parent="1">
+          <mxGeometry x="480" y="460" width="120" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-4" value="Vehicle" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="360" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-5" value="&lt;span style=&quot;font-size: 20px;&quot;&gt;Core 0&lt;/span&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="335" y="610" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-6" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Core 1&lt;/font&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="670" y="610" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="fbDC7U7bSzpT1u-7KixK-8" target="fbDC7U7bSzpT1u-7KixK-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-8" value="-Receive CAN frames on each MCP2515 interrupt&lt;div&gt;-Store each frame into circular buffer&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="280" y="650" width="190" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-9" value="-Package CAN frames and timestamp into TCP frame&lt;div&gt;-Send to server&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="280" y="830" width="190" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-14" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="fbDC7U7bSzpT1u-7KixK-12" target="fbDC7U7bSzpT1u-7KixK-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-12" value="-Receive TCP frame&lt;div&gt;-Parse frame into CAN field struct&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="610" y="820" width="190" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-13" value="-Reconstruct CAN frame&lt;div&gt;-Send to CAN bus&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="610" y="650" width="190" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-16" value="RPi" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="470" y="1160" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-17" value="" style="html=1;shadow=0;dashed=0;align=center;verticalAlign=middle;shape=mxgraph.arrows2.bendArrow;dy=15;dx=38;notch=0;arrowHead=55;rounded=1;flipV=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="940" width="100" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-19" value="" style="html=1;shadow=0;dashed=0;align=center;verticalAlign=middle;shape=mxgraph.arrows2.bendArrow;dy=15;dx=38;notch=0;arrowHead=55;rounded=1;flipV=0;flipH=1;rotation=90;" vertex="1" parent="1">
+          <mxGeometry x="532.5" y="1012.5" width="276.25" height="112.5" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-20" value="-Only one Core can access&lt;div&gt;the CAN bus at once&lt;/div&gt;&lt;div&gt;-Therefore access to the&amp;nbsp;&lt;/div&gt;&lt;div&gt;CAN bus has to be&lt;/div&gt;&lt;div&gt;synchronized with a&lt;/div&gt;&lt;div&gt;semaphore&lt;/div&gt;" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="125" y="250" width="250" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-22" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;&quot;Receiving from CAN bus&quot;&lt;/font&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="160" y="770" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-23" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;&quot;Transmitting to CAN bus&quot;&lt;/font&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="850" y="770" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-29" value="&lt;span style=&quot;font-size: 20px;&quot;&gt;ESP32 is client,&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-size: 20px;&quot;&gt;RPi is server&lt;/span&gt;&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="240" y="1040" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-31" value="&lt;div&gt;&lt;span style=&quot;font-size: 20px;&quot;&gt;RPi is client, ESP32 is server&lt;/span&gt;&lt;/div&gt;" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="760" y="1040" width="80" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="fbDC7U7bSzpT1u-7KixK-33" value="&lt;span style=&quot;color: rgb(255, 255, 255); font-family: Helvetica; font-size: 20px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(27, 29, 30); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;&quot;&gt;TCP/IP Socket&lt;/span&gt;" style="text;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="505" y="1070" width="90" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

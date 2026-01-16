@@ -9,8 +9,8 @@
  * 
  **/ 
 
-#include "can.h"
-#include <stdbool.h>
+ #include "can.h"
+ #include <stdbool.h>
 
 
 /*****************SPI MACROS********************/
@@ -25,7 +25,17 @@
 
 #define     ESP_HOST    VSPI_HOST
 
-extern char ascii_str[CAN_MAX_DLEN + 1];
+extern char ascii_str[CAN_MAX_DLEN + 1];        //testing
+
+/*******TIMESTAMPED CAN FRAME STRUCT********/
+
+typedef struct 
+{
+    CAN_FRAME canFrame;
+    uint32_t timestamp;
+
+} CanEntry_t;       //timestamped CAN entry
+
 
 
 /***********SPI FUNCTION PROTOTYPES**********/

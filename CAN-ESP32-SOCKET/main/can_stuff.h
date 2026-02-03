@@ -31,7 +31,7 @@ extern char ascii_str[CAN_MAX_DLEN + 1];        //testing
 
 typedef struct 
 {
-    CAN_FRAME canFrame;
+    CAN_FRAME canFrame;     
     uint32_t timestamp;
 
 } CanEntry_t;       //timestamped CAN entry

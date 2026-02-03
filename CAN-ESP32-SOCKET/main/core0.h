@@ -18,7 +18,7 @@ typedef enum
 
     CORE0_STATE0,
     CORE0_STATE1,
-    CORE0_STATE2
+    CORE0_STATE2    
 
 } Core0States_t;
 

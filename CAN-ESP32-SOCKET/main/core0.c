@@ -17,6 +17,7 @@ Author: Laith Al-Kinani
 
  #include "core0.h"
  #include "core1.h"
+ #include "ringbuffer.h"
  #include "can_stuff.h"
  #include <stdio.h>
  #include <stdbool.h>
@@ -48,7 +49,12 @@ Author: Laith Al-Kinani
      
      core0State->currentState = CORE0_STATE0;        //initialize state to 0
      CAN_Init();
-     /*     TODO: init ring buffer        */
+     ringbuffer_t rxBufferStruct = {0};
+     ringbuffer_t* canEntryRxBuffer = &rxBufferStruct;
+     ringbuffer_t  networkTxStruct = {0};
+     ringbuffer_t* networkTxBuffer = &networkTxStruct;
+     ringbuffer_init(canEntryRxBuffer);
+     ringbuffer_init(networkTxBuffer);
 
     while(1)
     {
@@ -70,12 +76,33 @@ Author: Laith Al-Kinani
             break;
             case(CORE0_STATE1):
 
-                if (gpio_get_level(INT_PIN) == 0)           //INT Line pulled low
+                if (gpio_get_level(INT_PIN) == 0)           //INT Line pulled low, there is a message
                 {
                 ESP_LOGI(TAG, "INT PULLED LOW SUCCESSFULLY.");
+                    
+                    /*  check if canEntryRxBuffer is empty before queueing it   */
 
-                   /*   read each frame  */
-                
+                    if (!isRingBufferFull(canEntryRxBuffer))        //ring buffer is empty
+                    {
+                        ringbuffer_queue(canEntryRxBuffer);          //stores CanEntry_t at HEAD
+
+                        //TODO: do we go back to core0_state0 to check if can bus is locked?
+                        //core0State->nextState = CORE0_STATE0;
+                    }
+
+                    else
+                    {
+                        /*  copy all contents to network_tx_buffer  */
+
+                        ringbuffer_copy(canEntryRxBuffer, networkTxBuffer);
+
+                        /*  reset rx_buffer */
+
+                        ringbuffer_init(canEntryRxBuffer);
+
+                        /*  go to next state    */
+                        core0State->nextState = CORE0_STATE2;
+                    }
                 }
 
             break;

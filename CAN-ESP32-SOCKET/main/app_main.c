@@ -14,7 +14,7 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_event.h"
-#include "can_stuff.h"
+#include "mcp2515_driver.h"
 #include "wifi_stuff.h"
 
 
@@ -34,30 +34,7 @@ ESP_ERROR_CHECK(esp_netif_init());
 ESP_ERROR_CHECK(nvs_flash_init());
 ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-xTaskCreatePinnedToCore 
-(
-    CAN_Polling,
-    "Polling for CAN...",
-    2048,
-    NULL,
-    1,
-    NULL,
-    0 //core 0
-);
-
-//pin the wifi stuff to core 1
-
-xTaskCreatePinnedToCore
-(
-    tcp_client,
-    "Setting up TCP Client...",
-    4096,
-    NULL,
-    1,
-    NULL,
-    1 //core 1
-
-);
+CAN_Init();
 
 
 }

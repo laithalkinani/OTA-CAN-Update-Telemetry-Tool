@@ -36,6 +36,8 @@ typedef struct
 
 } CanEntry_t;       //timestamped CAN entry
 
+//TODO: align this to fit memory efficiently
+
 
 
 /***********SPI FUNCTION PROTOTYPES**********/

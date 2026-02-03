@@ -6,7 +6,7 @@ Author: Laith Al-Kinani
 
 #include "esp_err.h"
 #include "wifi_stuff.h" //function prototypes macros etc.
-#include "can_stuff.h"
+#include "mcp2515_driver.h"
 #include "sdkconfig.h"
 #include "esp_netif.h"
 #include "esp_wifi.h"
@@ -14,6 +14,8 @@ Author: Laith Al-Kinani
 #include <sys/socket.h>
 #include <string.h>
 #include <errno.h>
+
+static const char* WIFI_TAG = "WIFI_STUFF";
 
 esp_err_t createClient(void)
 {

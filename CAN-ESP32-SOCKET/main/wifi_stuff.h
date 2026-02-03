@@ -16,7 +16,7 @@ Otherwise, we rebuild and reflash the code every time we change networks.
 #define HOST_IP "172.22.134.141"        
 #define PORT    1309 //figure this out later
 
-static const char* WIFI_TAG = "WIFI_STUFF";
+
 
 esp_err_t createClient(void);
 void tcp_client(void *arg);

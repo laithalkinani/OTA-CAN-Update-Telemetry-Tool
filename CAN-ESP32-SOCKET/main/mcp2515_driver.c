@@ -1,6 +1,6 @@
 /**
  * mcp2515_driver.c
- * Purpose: implement SPI and CAN functions
+ * Purpose: implement SPI and CAN functions, uses mcp2515.h library
  * Author: Laith Al-Kinani
  **/
 
@@ -23,25 +23,19 @@
  #include "freertos/queue.h"
  #include "freertos/semphr.h"
 
- /******GLOBALS************** */
+ /*     GLOBALS      */
 
- QueueHandle_t rx_queue;  /*  Queue Handlers  */
- static SemaphoreHandle_t mcp2515_int_sem = NULL;      /* Semaphore for MCP2515 /INT pin */
+ QueueHandle_t             rx_queue;  /*  Queue Handlers  */
+ static TaskHandle_t      mcp2515_rx_wakeup_notif = NULL;
 
- /***************SPI HANDLERS**********/
+ /*     SPI HANDLERS    */
 
 esp_err_t               ESP_ERR;
 spi_device_handle_t     spi_handle;
 static const char *TAG = "MCP2515_DRIVER";
 
-/****** FORWARD DECLARATIONS ******/
 
-static void mcp2515_task(void *pvParameters);        /*     Owner of MCP2515 read/write  */
-
-
-
-
-/**** SPI INIT *******/
+/*  SPI INIT    */
 
 bool SPI_Init(void)
 {
@@ -78,18 +72,26 @@ bool SPI_Init(void)
 
 /*     ISR - MCP2515 \INT PIN INTERRUPT HANDLER    */
 
+
+
  /*
  @brief: all this ISR does is wake up the MCP2515 task when /INT is pulled low
  */
  static void IRAM_ATTR mcp2515_ISR(void *arg) {
+    gpio_set_level(LED, 1);         //latch LED on when interrupt is hit
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;  //sets task woken to FALSE
-    xSemaphoreGiveFromISR(mcp2515_int_sem, &xHigherPriorityTaskWoken);  //
+    vTaskNotifyGiveFromISR(mcp2515_rx_wakeup_notif, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 
-/**** MCP2515 CAN CHIP INIT ********/
+/*      MCP2515 CAN CHIP INIT       */
 
+/*
+@brief: initializes the MCP2515, SPI bus, and /INT GPIO interrupt
+@params: none
+@ret: none
+*/
  void CAN_Init(void)
  {
 
@@ -142,63 +144,52 @@ bool SPI_Init(void)
     //TODO: make 32 a define macro later
     rx_queue = xQueueCreate(32, sizeof(CanEntry_t));    //queue 32 CanEntry_t structs which contains CAN frame + timestamp
 
-    /*  Create the Semaphore before enabling the ISR    */
-
-    mcp2515_int_sem = xSemaphoreCreateBinary();
+  
 
     /* Set gpio /INT pin as input (PULLED UP) (you sure it's pulled up dude?) */
     gpio_config_t io_conf = {
         .pin_bit_mask = (1ULL << INT_PIN),
         .mode = GPIO_MODE_INPUT,
-        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_up_en = GPIO_PULLUP_ENABLE,           //TODO: investigate if this really is pulled up or not
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
-        .intr_type = GPIO_INTR_NEGEDGE, //falling edge interrupt
+        .intr_type = GPIO_INTR_NEGEDGE, //falling edge interrupt. TODO: explore GPIO_INTR_LOW_LEVEL
     };
     gpio_config(&io_conf);
 
     gpio_install_isr_service(0);        //creates ISR service with flag 0 (default)
+    
     gpio_isr_handler_add(INT_PIN, mcp2515_ISR, NULL);   //attaches ISR handler to INT_PIN
 
     //at this point the ISR has been enabled, mcp2515_ISR gives semaphore to wake up task every time /INT pulled low
-
-    /*  Finally, create the MCP2515 task with priority 5 (HIGHEST)    */
-    xTaskCreate(mcp2515_task, "MCP2515", 4096, NULL, 5, NULL);
-
+    
     ESP_LOGI(TAG, "MCP2515 driver successfully initialized...!  ");
+
 
  }
 
- //TODO: define the MCP2515 task logic
 
- static void mcp2515_task(void *pvParameters) {
-    struct can_frame frame_struct;   //actual frame
-    CAN_FRAME frame = &frame_struct; //pointer to pass the frame
+/*
+@brief: sleeps until /INT wakes it up; then proceeds to read CAN msg over SPI.
+        Owner of the MCP2515 driver.
+@params: *pvParameters; config pointer
+@ret: none
+*/
+void mcp2515_task(void *pvParameters) 
+{
+    mcp2515_rx_wakeup_notif = xTaskGetCurrentTaskHandle();      //attaches task handle to task notif handle
+    ESP_LOGI(TAG, "Starting the MCP2515 task... ");
+    //TODO: use CanEntry_t struct instance instead
 
-    while (1) {
-        //wait for semaphore from ISR
-        if (xSemaphoreTake(mcp2515_int_sem, portMAX_DELAY) == pdTRUE) {
+
+    while (1) 
+    {
+        //use task notification
+        if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY)) {
+             gpio_set_level(LED, 0); //pull LED low when int wakes up the task 
+             
+             
             //Semaphore taken, /INT was pulled low, read message
-            ESP_LOGI(TAG, "MCP2515 /INT detected, reading message...");
-
-            if (MCP2515_readMessageAfterStatCheck(frame) == 1) {
-                //Successfully read a message
-                ESP_LOGI(TAG, "Message received with ID: 0x%08X", (unsigned int long)frame->can_id);
-                ESP_LOGI(TAG, "DLC: %d", frame->can_dlc);
-
-                //Create a CanEntry_t to hold the frame and timestamp
-                CanEntry_t entry;
-                entry.canFrame = frame;
-                entry.timestamp = xTaskGetTickCount();
-
-                //Send the entry to the RX queue
-                if (xQueueSend(rx_queue, &entry, 0) != pdPASS) {
-                    ESP_LOGW(TAG, "RX Queue full, message dropped!");
-                } else {
-                    ESP_LOGI(TAG, "Message queued successfully.");
-                }
-            } else {
-                ESP_LOGE(TAG, "Failed to read message from MCP2515.");
-            }
+            ESP_LOGI(TAG, "MCP2515 /INT detected...");
         }
     }
  }

@@ -48,7 +48,8 @@ bool SPI_Init(void);
 /***********CAN FUNCTION PROTOTYPES**********/
 
 void CAN_Init(void);
-void CAN_Polling(void* arg);
+void mcp2515_task(void *pvParameters);        /*     Owner of MCP2515 read/write  */
+
 
 
 

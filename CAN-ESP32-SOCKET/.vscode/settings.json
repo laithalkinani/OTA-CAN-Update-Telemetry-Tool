@@ -24,5 +24,6 @@
     "esp_err.h": "c",
     "functional": "c"
   },
-  "idf.port": "/dev/tty.usbserial-0001"
+  "idf.port": "/dev/tty.usbserial-0001",
+  "idf.currentSetup": "/Users/lalkinani/esp/v5.5.1/esp-idf"
 }

@@ -1,10 +1,10 @@
-#ifndef CAN_STUFF_H
-#define CAN_STUFF_H
+#ifndef MCP2515_DRIVER_H
+#define MCP2515_DRIVER_H
 
 
 /**
  * 
- * can_stuff_h
+ * MCP2515_DRIVER.h
  * Purpose: define all GPIO locations and settings for SPI and CAN functions
  * 
  **/ 
@@ -25,7 +25,6 @@
 
 #define     ESP_HOST    VSPI_HOST
 
-extern char ascii_str[CAN_MAX_DLEN + 1];        //testing
 
 /*******TIMESTAMPED CAN FRAME STRUCT********/
 
@@ -53,4 +52,4 @@ void mcp2515_task(void *pvParameters);        /*     Owner of MCP2515 read/write
 
 
 
-#endif //CAN_STUFF_H
+#endif //MCP2515_DRIVER_H

@@ -6,7 +6,7 @@
 
  /**
   * SPI Speed: 2 MHz
-  * CAN Speed: 125 KBS
+  * CAN Speed: 500 KBS
   * CAN Clock: 8 MHz
   */
 
@@ -59,12 +59,20 @@ bool SPI_Init(void)
     };
 
     ret = spi_bus_initialize(ESP_HOST, &bus_cfg, SPI_DMA_DISABLED);
-    ESP_ERROR_CHECK(ret);
+    if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "spi_bus_initialize failed: %s", esp_err_to_name(ret));
+    return false;
+    }
+    ESP_LOGI(TAG, "spi_bus_initialize OK");
 
     ret = spi_bus_add_device(ESP_HOST, &dev_cfg, &MCP2515_Object->spi);
-    ESP_ERROR_CHECK(ret);
-    ESP_LOGI(TAG, "SPI BUS INIT AND DEVICE ADDED");
-    ESP_LOGI(TAG, "SPI HANDLE: %p \n", MCP2515_Object->spi);
+    if (ret != ESP_OK) {
+    ESP_LOGE(TAG, "spi_bus_add_device failed: %s", esp_err_to_name(ret));
+    return false;
+    }
+    ESP_LOGI(TAG, "spi_bus_add_device OK");
+    ESP_LOGI(TAG, "SPI HANDLE: %p", MCP2515_Object->spi);
+
 
     return true;
 
@@ -117,6 +125,22 @@ bool SPI_Init(void)
 
     MCP2515_init();     //creates MCP2515 object
     SPI_Init();
+
+        uint8_t tx[3] = {0x03, 0x0E, 0x00}; // READ CANSTAT
+        uint8_t rx[3] = {0};
+
+        spi_transaction_t t = {
+        .length = 8 * 3,
+        .tx_buffer = tx,
+        .rx_buffer = rx
+        };
+
+        gpio_set_level(CS_PIN, 0);
+        spi_device_transmit(MCP2515_Object->spi, &t);
+        gpio_set_level(CS_PIN, 1);
+
+        ESP_LOGI("SPI", "RAW RX: %02X %02X %02X", rx[0], rx[1], rx[2]);
+
     MCP2515_reset();    //clears any buffers
     MCP2515_setBitrate(CAN_500KBPS, MCP_8MHZ);      //500 KBS bit rate
     MCP2515_setNormalMode();
@@ -176,23 +200,85 @@ bool SPI_Init(void)
 */
 void mcp2515_task(void *pvParameters) 
 {
-    mcp2515_rx_wakeup_notif = xTaskGetCurrentTaskHandle();      //attaches task handle to task notif handle
-    ESP_LOGI(TAG, "Starting the MCP2515 task... ");
-    //TODO: use CanEntry_t struct instance instead
-
-
+    ESP_LOGI(TAG, "Starting MCP2515 polling task...");
+    
+    struct can_frame frame;
+    CAN_FRAME framePtr = &frame;
+    char ascii_str[9]; // Buffer for ASCII data (8 bytes + null terminator)
+    
+    // Give the MCP2515 a moment to stabilize after init
+    vTaskDelay(pdMS_TO_TICKS(100));
+    
     while (1) 
     {
-        //use task notification
-        if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY)) {
-             gpio_set_level(LED, 0); //pull LED low when int wakes up the task 
-             
-             
-            //Semaphore taken, /INT was pulled low, read message
-            ESP_LOGI(TAG, "MCP2515 /INT detected...");
+        // Poll for received messages using the RX status check
+        uint8_t rx_status = MCP2515_checkReceive();
+        
+        if (rx_status != 0) {
+            // Turn on LED to indicate message reception
+            gpio_set_level(LED, 1);
+            
+            ESP_LOGI(TAG, "Message detected! RX_STATUS: 0x%02X", rx_status);
+            
+            // Read the message
+            ERROR_t err = MCP2515_readMessageAfterStatCheck(framePtr);
+            
+            if (err == ERROR_OK) {
+                // Log frame information
+                ESP_LOGI(TAG, "FRAME ID: 0x%08X", (unsigned int)framePtr->can_id);
+                ESP_LOGI(TAG, "DLC: %d", framePtr->can_dlc);
+                
+                // Convert data to ASCII string if printable
+                if (framePtr->can_dlc > 0 && framePtr->can_dlc <= 8) {
+                    memcpy(ascii_str, framePtr->data, framePtr->can_dlc);
+                    ascii_str[framePtr->can_dlc] = '\0';
+                    ESP_LOGI(TAG, "DATA (ASCII): %s", ascii_str);
+                    
+                    // Also log hex values
+                    ESP_LOG_BUFFER_HEX(TAG, framePtr->data, framePtr->can_dlc);
+                }
+                
+                // Queue the message with timestamp
+                CanEntry_t entry = {
+                    .canFrame = framePtr,  // Copy the whole struct, not just pointer
+                    .timestamp = xTaskGetTickCount() * portTICK_PERIOD_MS
+                };
+                
+                if (xQueueSend(rx_queue, &entry, 0) != pdTRUE) {
+                    ESP_LOGW(TAG, "RX queue full, message dropped");
+                }
+                
+                // Verify INT pin state
+                if (gpio_get_level(INT_PIN) == 0) {
+                    ESP_LOGI(TAG, "INT pin LOW (correct)");
+                } else {
+                    ESP_LOGW(TAG, "INT pin HIGH (unexpected)");
+                }
+                
+                // Turn off LED after processing
+                gpio_set_level(LED, 0);
+                
+            } else {
+                ESP_LOGE(TAG, "Read error: %d", err);
+                
+                // Log diagnostic information
+                uint8_t canintf = MCP2515_readRegister(MCP_CANINTF);
+                uint8_t eflg = MCP2515_readRegister(MCP_EFLG);
+                ESP_LOGE(TAG, "CANINTF: 0x%02X, EFLG: 0x%02X", canintf, eflg);
+            }
+            
+            // Check for errors after reading
+            uint8_t error_flags = MCP2515_getErrorFlags();
+            if (error_flags != 0) {
+                ESP_LOGW(TAG, "ERROR FLAGS: 0x%02X", error_flags);
+            }
         }
+        
+        // Poll every 10ms (100 Hz polling rate)
+        // Adjust this based on your expected message rate
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
- }
+}
 
  
 

@@ -31,4 +31,7 @@ CAN_Init();
 xTaskCreate(mcp2515_task, "MCP2515", 4096, NULL, 5, NULL);
 
 
+CAN_EnableInterrupts();
+
+
 }

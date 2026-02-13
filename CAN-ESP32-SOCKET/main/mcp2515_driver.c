@@ -126,6 +126,27 @@ bool SPI_Init(void)
     MCP2515_init();     //creates MCP2515 object
     SPI_Init();
 
+     vTaskDelay(pdMS_TO_TICKS(100)); //100ms settling time
+    
+   
+    for (int attempt = 0; attempt < 3; attempt++) {
+        MCP2515_reset();
+        vTaskDelay(pdMS_TO_TICKS(20));
+        
+        uint8_t canctrl = MCP2515_readRegister(MCP_CANCTRL);
+        ESP_LOGI(TAG, "Reset attempt %d: CANCTRL = 0x%02X", attempt + 1, canctrl);
+        
+        if (canctrl == 0x87 || canctrl == 0x07) {
+            ESP_LOGI(TAG, "MCP2515 reset successful");
+            break;
+        }
+        
+        if (attempt == 2) {
+            ESP_LOGE(TAG, "MCP2515 reset failed after 3 attempts - halting");
+            while(1) vTaskDelay(1000);
+        }
+    }
+
         uint8_t tx[3] = {0x03, 0x0E, 0x00}; // READ CANSTAT
         uint8_t rx[3] = {0};
 
@@ -168,7 +189,17 @@ bool SPI_Init(void)
     //TODO: make 32 a define macro later
     rx_queue = xQueueCreate(32, sizeof(CanEntry_t));    //queue 32 CanEntry_t structs which contains CAN frame + timestamp
 
-  
+    // Enable MCP2515 interrupts for RX buffers
+    MCP2515_setRegister(MCP_CANINTE, 0x03);  // Enable RX0IE and RX1IE
+
+    // Clear any pending interrupt flags from boot
+    MCP2515_setRegister(MCP_CANINTF, 0x00);  // Clear all interrupt flags
+
+    ESP_LOGI(TAG, "CANINTE: 0x%02X", MCP2515_readRegister(MCP_CANINTE));
+    ESP_LOGI(TAG, "CANINTF: 0x%02X (should be 0x00)", MCP2515_readRegister(MCP_CANINTF));
+
+    // Verify INT pin is HIGH before enabling interrupt
+    ESP_LOGI(TAG, "INT pin level before enabling interrupt: %d", gpio_get_level(INT_PIN));
 
     /* Set gpio /INT pin as input (PULLED UP) (you sure it's pulled up dude?) */
     gpio_config_t io_conf = {
@@ -180,9 +211,6 @@ bool SPI_Init(void)
     };
     gpio_config(&io_conf);
 
-    gpio_install_isr_service(0);        //creates ISR service with flag 0 (default)
-    
-    gpio_isr_handler_add(INT_PIN, mcp2515_ISR, NULL);   //attaches ISR handler to INT_PIN
 
     //at this point the ISR has been enabled, mcp2515_ISR gives semaphore to wake up task every time /INT pulled low
     
@@ -190,6 +218,13 @@ bool SPI_Init(void)
 
 
  }
+
+ void CAN_EnableInterrupts(void)
+{
+    gpio_install_isr_service(0);
+    gpio_isr_handler_add(INT_PIN, mcp2515_ISR, NULL);
+    ESP_LOGI(TAG, "MCP2515 interrupts enabled");
+}
 
 
 /*
@@ -200,83 +235,44 @@ bool SPI_Init(void)
 */
 void mcp2515_task(void *pvParameters) 
 {
-    ESP_LOGI(TAG, "Starting MCP2515 polling task...");
+    mcp2515_rx_wakeup_notif = xTaskGetCurrentTaskHandle();
+    
+    ESP_LOGI(TAG, "MCP2515 task started - waiting for interrupts");
     
     struct can_frame frame;
     CAN_FRAME framePtr = &frame;
-    char ascii_str[9]; // Buffer for ASCII data (8 bytes + null terminator)
-    
-    // Give the MCP2515 a moment to stabilize after init
-    vTaskDelay(pdMS_TO_TICKS(100));
+    char ascii_str[9];
     
     while (1) 
     {
-        // Poll for received messages using the RX status check
-        uint8_t rx_status = MCP2515_checkReceive();
-        
-        if (rx_status != 0) {
-            // Turn on LED to indicate message reception
-            gpio_set_level(LED, 1);
+        if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY)) {
             
-            ESP_LOGI(TAG, "Message detected! RX_STATUS: 0x%02X", rx_status);
+            // 1. Turn LED off
+            gpio_set_level(LED, 0);
             
-            // Read the message
+            // 2. Read the message
             ERROR_t err = MCP2515_readMessageAfterStatCheck(framePtr);
             
+            // 3. Print logs
             if (err == ERROR_OK) {
-                // Log frame information
                 ESP_LOGI(TAG, "FRAME ID: 0x%08X", (unsigned int)framePtr->can_id);
                 ESP_LOGI(TAG, "DLC: %d", framePtr->can_dlc);
                 
-                // Convert data to ASCII string if printable
                 if (framePtr->can_dlc > 0 && framePtr->can_dlc <= 8) {
                     memcpy(ascii_str, framePtr->data, framePtr->can_dlc);
                     ascii_str[framePtr->can_dlc] = '\0';
                     ESP_LOGI(TAG, "DATA (ASCII): %s", ascii_str);
-                    
-                    // Also log hex values
                     ESP_LOG_BUFFER_HEX(TAG, framePtr->data, framePtr->can_dlc);
                 }
                 
-                // Queue the message with timestamp
-                CanEntry_t entry = {
-                    .canFrame = framePtr,  // Copy the whole struct, not just pointer
-                    .timestamp = xTaskGetTickCount() * portTICK_PERIOD_MS
-                };
-                
-                if (xQueueSend(rx_queue, &entry, 0) != pdTRUE) {
-                    ESP_LOGW(TAG, "RX queue full, message dropped");
-                }
-                
-                // Verify INT pin state
-                if (gpio_get_level(INT_PIN) == 0) {
-                    ESP_LOGI(TAG, "INT pin LOW (correct)");
-                } else {
-                    ESP_LOGW(TAG, "INT pin HIGH (unexpected)");
-                }
-                
-                // Turn off LED after processing
-                gpio_set_level(LED, 0);
+                ESP_LOGI(TAG, "INT pin: %d", gpio_get_level(INT_PIN));
                 
             } else {
                 ESP_LOGE(TAG, "Read error: %d", err);
-                
-                // Log diagnostic information
-                uint8_t canintf = MCP2515_readRegister(MCP_CANINTF);
-                uint8_t eflg = MCP2515_readRegister(MCP_EFLG);
-                ESP_LOGE(TAG, "CANINTF: 0x%02X, EFLG: 0x%02X", canintf, eflg);
             }
             
-            // Check for errors after reading
-            uint8_t error_flags = MCP2515_getErrorFlags();
-            if (error_flags != 0) {
-                ESP_LOGW(TAG, "ERROR FLAGS: 0x%02X", error_flags);
-            }
+            // 4. Wait for next interrupt
         }
-        
-        // Poll every 10ms (100 Hz polling rate)
-        // Adjust this based on your expected message rate
-        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 

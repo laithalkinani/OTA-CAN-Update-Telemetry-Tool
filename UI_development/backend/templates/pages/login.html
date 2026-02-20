@@ -1,0 +1,51 @@
+<!doctype html><html lang="en">
+<head><title>Home | Dashboardkit Dashboard Template</title><!-- [Meta] --><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,minimal-ui"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="description" content="Dashboardkit is trending dashboard template made using Bootstrap 5 design framework. Dashboardkit is available in Bootstrap, React, CodeIgniter, Angular,  and .net Technologies."><meta name="keywords" content="Bootstrap admin template, Dashboard UI Kit, Dashboard Template, Backend Panel, react dashboard, angular dashboard"><meta name="author" content="Codedthemes"><!-- [Favicon] icon --><link rel="icon" href="../assets/images/favicon.svg" type="image/x-icon"><!-- [Google Font : Public Sans] icon --><link href="https://fonts.googleapis.com/css2?family=Inter:wght@700..700&display=swap" rel="stylesheet"><!-- [phosphor Icons] https://phosphoricons.com/ --><link rel="stylesheet" href="../assets/fonts/phosphor/duotone/style.css"><!-- [Tabler Icons] https://tablericons.com --><link rel="stylesheet" href="../assets/fonts/tabler-icons.min.css"><!-- [Feather Icons] https://feathericons.com --><link rel="stylesheet" href="../assets/fonts/feather.css"><!-- [Font Awesome Icons] https://fontawesome.com/icons --><link rel="stylesheet" href="../assets/fonts/fontawesome.css"><!-- [Material Icons] https://fonts.google.com/icons --><link rel="stylesheet" href="../assets/fonts/material.css"><!-- [Template CSS Files] --><link rel="stylesheet" href="../assets/css/style.css" id="main-style-link"></head>
+<body data-pc-preset="preset-1" data-pc-sidebar-theme="dark" data-pc-header-theme="dark" data-pc-theme="dark" style="background:#1a1a2e;">
+<div class="d-flex align-items-center justify-content-center" style="min-height:100vh;">
+  <div class="card" style="width:100%;max-width:420px;">
+    <div class="card-body p-4">
+      <div class="text-center mb-4">
+        <i class="material-icons-two-tone" style="font-size:48px;color:#6610f2;">lock</i>
+        <h4 class="mt-2">Message Login</h4>
+        <p class="text-muted">Enter your credentials to access messages.</p>
+      </div>
+      <div id="error-msg" class="alert alert-danger d-none" role="alert">Invalid username or password.</div>
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" placeholder="Enter username">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" id="password" placeholder="Enter password">
+      </div>
+      <button class="btn btn-primary w-100" onclick="doLogin()">Login</button>
+      <div class="text-center mt-3">
+        <a href="/" class="text-muted" style="font-size:13px;">← Back to Dashboard</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../assets/js/plugins/popper.min.js"></script>
+<script src="../assets/js/plugins/simplebar.min.js"></script>
+<script src="../assets/js/plugins/bootstrap.min.js"></script>
+<script src="../assets/js/fonts/custom-font.js"></script>
+<script src="../assets/js/pcoded.js"></script>
+<script src="../assets/js/plugins/feather.min.js"></script>
+<script>layout_change('dark'); layout_sidebar_change('dark');</script>
+<script>
+const USERS = {
+  "exampleuser": "examplepassword"
+};
+function doLogin() {
+  const u = document.getElementById('username').value.trim();
+  const p = document.getElementById('password').value;
+  if (USERS[u] && USERS[u] === p) {
+    sessionStorage.setItem('msg_authed', '1');
+    window.location.href = '/message';
+  } else {
+    document.getElementById('error-msg').classList.remove('d-none');
+  }
+}
+document.getElementById('password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+</script>
+</body></html>

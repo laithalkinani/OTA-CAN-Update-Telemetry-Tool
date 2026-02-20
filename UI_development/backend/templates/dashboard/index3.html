@@ -58,9 +58,7 @@
             </div>
           </div>
           <div class="card-body pt-2 pb-2">
-            <div style="overflow-x:auto;">
-              <div id="telemetry-chart" style="min-width:700px;"></div>
-            </div>
+            <div id="telemetry-chart"></div>
           </div>
         </div>
       </div>
@@ -70,22 +68,22 @@
     <div class="row">
       <div class="col-12">
         <div class="card mb-0">
-          <div class="card-header py-2">
+          <div class="card-header d-flex justify-content-between align-items-center py-2">
             <h5 id="table-title" class="mb-0">Stat 1 — Data Log</h5>
           </div>
           <div class="card-body p-0">
-            <div class="table-responsive" style="max-height:480px;overflow-y:auto;">
-              <table class="table table-hover mb-0" style="table-layout:fixed;width:100%;">
-                <thead style="position:sticky;top:0;z-index:2;">
-                  <tr style="background:#2d2d3f;">
-                    <th style="width:33.3%;text-align:center;padding:12px 8px;background:#2d2d3f;color:#c5cbe0;border-bottom:2px solid #6610f2;">
+            <div class="table-responsive" style="max-height:280px;overflow-y:auto;">
+              <table class="table table-hover mb-0">
+                <thead class="sticky-top" style="z-index:1;">
+                  <tr>
+                    <th>
                       Actual Time
-                      <button class="btn btn-sm p-0 ms-1" id="sort-btn" onclick="toggleSort()" title="Toggle sort order" style="line-height:1;color:#c5cbe0;">
+                      <button class="btn btn-sm p-0 ms-1" id="sort-btn" onclick="toggleSort()" title="Toggle sort order" style="line-height:1;">
                         <i class="material-icons-two-tone" id="sort-icon" style="font-size:16px;vertical-align:middle">unfold_more</i>
                       </button>
                     </th>
-                    <th style="width:33.3%;text-align:center;padding:12px 8px;background:#2d2d3f;color:#c5cbe0;border-bottom:2px solid #6610f2;">Time Elapsed</th>
-                    <th id="value-col-header" style="width:33.3%;text-align:center;padding:12px 8px;background:#2d2d3f;color:#c5cbe0;border-bottom:2px solid #6610f2;">Value</th>
+                    <th>Time Elapsed</th>
+                    <th id="value-col-header">Value</th>
                   </tr>
                 </thead>
                 <tbody id="table-body"></tbody>
@@ -120,6 +118,7 @@ let chart = null;
 let currentRows = [];
 let sortNewestFirst = true;
 let showMarkers = false;
+let currentStatIndex = 0;
 
 function generateData(idx) {
   const stat = STATS[idx];
@@ -143,11 +142,7 @@ function renderTable() {
   const sorted = [...currentRows].sort((a,b) => sortNewestFirst ? b.ts - a.ts : a.ts - b.ts);
   document.getElementById('sort-icon').textContent = sortNewestFirst ? 'arrow_downward' : 'arrow_upward';
   document.getElementById('table-body').innerHTML = sorted.map(r =>
-    `<tr>
-      <td style="text-align:center;width:33.3%">${r.time}</td>
-      <td style="text-align:center;width:33.3%">${r.elapsed}</td>
-      <td style="text-align:center;width:33.3%"><strong>${r.val}</strong></td>
-    </tr>`
+    `<tr><td>${r.time}</td><td>${r.elapsed}</td><td><strong>${r.val}</strong></td></tr>`
   ).join('');
 }
 
@@ -168,8 +163,8 @@ function toggleMarkers() {
 }
 
 function selectStat(num) {
-  const idx = num - 1;
-  const { points, rows, stat } = generateData(idx);
+  currentStatIndex = num - 1;
+  const { points, rows, stat } = generateData(currentStatIndex);
   currentRows = rows;
 
   document.querySelectorAll('.stat-btn').forEach(b => {

@@ -8,39 +8,23 @@ app = Flask(__name__,
 
 @app.route("/")
 def dashboard():
-    return render_template("dashboard/index2.html")
+    return render_template("dashboard/index4.html")
 
 @app.route("/login")
 def login():
-    return render_template("pages/login-v1.html")
-
-@app.route("/register")
-def register():
-    return render_template("pages/register-v1.html")
-
-@app.route("/sample")
-def sample():
-    return render_template("other/sample-page.html")
-
-@app.route("/typography")
-def typography():
-    return render_template("elements/bc_typography.html")
-
-@app.route("/color")
-def color():
-    return render_template("elements/bc_color.html")
-
-@app.route("/icons")
-def icons():
-    return render_template("elements/icon-material.html")
+    return render_template("pages/login.html")
 
 @app.route("/pastlog")
 def pastlog():
     return render_template("pastlog/pastlog.html")
 
+@app.route("/checkpoint-login")
+def checkpoint_login():
+    return render_template("checkpoint_login.html")
+
 @app.route("/checkpoint")  
 def checkpoint():
-    return render_template("checkpoint/checkpoint.html")
+    return render_template("checkpoint/checkpoint1.html")
 
 @app.route("/message")
 def message():

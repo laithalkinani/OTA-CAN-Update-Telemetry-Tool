@@ -81,7 +81,7 @@
                     <th style="width:33.3%;text-align:center;padding:12px 8px;background:#2d2d3f;color:#c5cbe0;border-bottom:2px solid #6610f2;">
                       Actual Time
                       <button class="btn btn-sm p-0 ms-1" id="sort-btn" onclick="toggleSort()" title="Toggle sort order" style="line-height:1;color:#c5cbe0;">
-                        <i class="material-icons-two-tone" id="sort-icon" style="font-size:16px;vertical-align:middle">unfold_more</i>
+                        <i class="material-icons-two-tone" id="sort-icon" style="font-size:16px;vertical-align:middle;color:#c5cbe0;">unfold_more</i>
                       </button>
                     </th>
                     <th style="width:33.3%;text-align:center;padding:12px 8px;background:#2d2d3f;color:#c5cbe0;border-bottom:2px solid #6610f2;">Time Elapsed</th>
@@ -190,12 +190,12 @@ function selectStat(num) {
     series: [{ name: stat.unit, data: points }],
     xaxis: {
       type: 'datetime',
-      title: { text: 'Actual Time', style: { color: '#aaa', fontSize: '12px' } },
-      labels: { datetimeUTC: false, format: 'HH:mm', style: { colors: '#aaa' } }
+      title: { text: 'Actual Time', style: { color: '#888', fontSize: '12px' } },
+      labels: { datetimeUTC: false, format: 'HH:mm', style: { colors: ['#888'] } }
     },
     yaxis: {
-      title: { text: stat.unit, style: { color: '#aaa', fontSize: '12px' } },
-      labels: { formatter: v => v.toFixed(1), style: { colors: '#aaa' } }
+      title: { text: stat.unit, style: { color: '#888', fontSize: '12px' } },
+      labels: { formatter: v => v.toFixed(1), style: { colors: ['#888'] } }
     },
     stroke: { curve: 'smooth', width: 2 },
     fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05 } },

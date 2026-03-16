@@ -1,13 +1,16 @@
-#ifndef CAN_STUFF_H
-#define CAN_STUFF_H
+#ifndef MCP2515_DRIVER_H
+#define MCP2515_DRIVER_H
+
 
 /**
  * 
- * can_stuff_h
+ * MCP2515_DRIVER.h
  * Purpose: define all GPIO locations and settings for SPI and CAN functions
  * 
  **/ 
 
+ #include "can.h"
+ #include <stdbool.h>
 
 
 /*****************SPI MACROS********************/
@@ -23,6 +26,19 @@
 #define     ESP_HOST    VSPI_HOST
 
 
+/*******TIMESTAMPED CAN FRAME STRUCT********/
+
+typedef struct 
+{
+    CAN_FRAME canFrame;     
+    uint32_t timestamp;
+
+} CanEntry_t;       //timestamped CAN entry
+
+//TODO: align this to fit memory efficiently
+
+
+
 /***********SPI FUNCTION PROTOTYPES**********/
 
 bool SPI_Init(void);
@@ -31,8 +47,10 @@ bool SPI_Init(void);
 /***********CAN FUNCTION PROTOTYPES**********/
 
 void CAN_Init(void);
-void CAN_Polling(void* arg);
+void CAN_EnableInterrupts(void);
+void mcp2515_task(void *pvParameters);        /*     Owner of MCP2515 read/write  */
 
 
 
-#endif //CAN_STUFF_H
+
+#endif //MCP2515_DRIVER_H

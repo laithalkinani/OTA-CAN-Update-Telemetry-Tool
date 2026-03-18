@@ -1,0 +1,5 @@
+{
+    "idf.portWin": "COM4",
+    "cmake.sourceDirectory": "C:/Users/HP/OneDrive - University of Windsor/Desktop/Capstone/CAN-Telemetry/CAN-ESP32-SOCKET/main",
+    "idf.pythonInstallPath": "/usr/bin/python3"
+}

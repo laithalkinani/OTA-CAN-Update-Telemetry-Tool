@@ -7,7 +7,7 @@
 #include "esp_twai_onchip.h"
 #include "can_2_mqtt.h"
 
-static const char* TAG = "TWAI_TASK";
+static const char* TAG = "CAN_2_MQTT_TASK";
 static twai_node_handle_t node_hdl = NULL;
 static rx_msg_buffer_t rx_buffer;       //rx_buffer is the "glue" buffer between ISR and task, contains header and payload
 static QueueHandle_t can_2_mqtt_queue = NULL;
@@ -114,7 +114,7 @@ static void flush_can2mqttbuffer(rx_msg_buffer_t* buffer)
 }
 
 
-void twai_rx_task(void *pvParameters)
+void can_2_mqtt_task(void *pvParameters)
 {
     ESP_LOGI(TAG, "TWAI RX Task started");
     

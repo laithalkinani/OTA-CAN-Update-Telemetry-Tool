@@ -22,7 +22,7 @@ typedef struct {
 
 /*  Function Prototypes */
 void twai_init();
-void twai_rx_task(void *pvParameters);
+void can_2_mqtt_task(void *pvParameters);
 
 
 

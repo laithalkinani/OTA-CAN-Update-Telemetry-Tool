@@ -26,7 +26,8 @@ ESP_ERROR_CHECK(esp_netif_init());
 ESP_ERROR_CHECK(nvs_flash_init());
 ESP_ERROR_CHECK(esp_event_loop_create_default());
 
+initWifiSta();
 
-xTaskCreate(twai_rx_task, "twai_rx_task", 4096, NULL, 5, NULL);
+xTaskCreate(can_2_mqtt_task, "can_2_mqtt_task", 4096, NULL, 5, NULL);
 
 }

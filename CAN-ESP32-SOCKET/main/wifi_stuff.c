@@ -24,8 +24,8 @@ Author: Laith Al-Kinani
 
 static const char* WIFI_TAG = "WIFI_INIT";
 
-static const char* SSID     =   "Al-Kinani Family";
-static const char* password =   "Faith2008";
+static const char* SSID = "Laith\xE2\x80\x99s iPhone";  //special apostrophe character encoding for iphone
+static const char* password =   "laithiscool";
 
 static uint16_t s_retry_num = 0;
 
@@ -95,8 +95,10 @@ void initWifiSta(void)
                                                         &instance_got_ip));
 
     wifi_config_t wifi_config = {0};
-    strncpy((char*)wifi_config.sta.ssid,     SSID,     sizeof(wifi_config.sta.ssid) - 1);
+    memcpy(wifi_config.sta.ssid, SSID, strlen(SSID)); 
+    wifi_config.sta.password[sizeof(wifi_config.sta.password) - 1] = 0;  // safety null-term
     strncpy((char*)wifi_config.sta.password, password, sizeof(wifi_config.sta.password) - 1);
+    wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;        //forcing WPA2
     
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );

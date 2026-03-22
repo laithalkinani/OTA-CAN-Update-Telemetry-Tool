@@ -14,7 +14,6 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_event.h"
-#include "mcp2515_driver.h"
 #include "wifi_stuff.h"
 #include "can_2_mqtt.h"
 

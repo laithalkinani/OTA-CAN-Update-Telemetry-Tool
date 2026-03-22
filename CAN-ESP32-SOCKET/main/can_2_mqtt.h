@@ -1,7 +1,7 @@
 
 
-#ifndef CAN_TASK_H
-#define CAN_TASK_H
+#ifndef CAN_2_MQTT_H
+#define CAN_2_MQTT_H
 
 #include "esp_twai.h"
 #include "esp_twai_onchip.h"
@@ -22,10 +22,10 @@ typedef struct {
 
 /*  Function Prototypes */
 void twai_init();
-void twai_rx_task(void *pvParameters);
+void can_2_mqtt_task(void *pvParameters);
 
 
 
 
 
-#endif //CAN_TASK_H
+#endif //CAN_2_MQTT_H

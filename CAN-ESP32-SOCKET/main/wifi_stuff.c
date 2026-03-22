@@ -39,17 +39,18 @@ static void wifiEventHandler(void* arg, esp_event_base_t event_base, int32_t eve
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
     {
         esp_wifi_connect();
-        //TODO: latch WIFI_STATUS_LED on
+        
     }
 
     else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
     {
+        gpio_set_level(WIFI_STATUS_LED, 0);
         if (s_retry_num < MAX_WIFI_CONNECT_RETRIES)
         {
             esp_wifi_connect();         //try again
             s_retry_num++;
             ESP_LOGI(WIFI_TAG, "Retrying to connect to the AP...");
-            //TODO: blink LEDs? or just keep it off? i think keep it off better
+           
         }
         else
         {
@@ -60,6 +61,7 @@ static void wifiEventHandler(void* arg, esp_event_base_t event_base, int32_t eve
 
     else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
     {
+        gpio_set_level(WIFI_STATUS_LED, 1);
         ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
         ESP_LOGI(WIFI_TAG, "Got IP address: " IPSTR, IP2STR(&event->ip_info.ip));
         s_retry_num = 0;
@@ -112,12 +114,11 @@ void initWifiSta(void)
     if (bits & WIFI_CONNECTED_BIT)
     {
         ESP_LOGI(WIFI_TAG, "Connected to AP with SSID: %s PW: %s", SSID, password);
-        gpio_set_level(WIFI_STATUS_LED, 1);
+        
     }
     else if (bits & WIFI_FAIL_BIT)
     {
         ESP_LOGI(WIFI_TAG, "FAILED to connect to Wi-Fi...!!!!");
-        gpio_set_level(WIFI_STATUS_LED, 0);
     }
     else
     {

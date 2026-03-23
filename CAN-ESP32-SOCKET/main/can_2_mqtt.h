@@ -14,7 +14,8 @@
 
 
 /*  Buffer to pass msg from rx_callback to twai_rx_task     */
-typedef struct {
+typedef struct
+ {
     twai_frame_header_t header;
     uint8_t canPayload[8];      //size of payload for classic CAN
 } rx_msg_buffer_t;

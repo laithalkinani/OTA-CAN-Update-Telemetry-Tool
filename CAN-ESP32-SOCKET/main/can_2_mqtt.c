@@ -6,6 +6,7 @@
 #include "esp_twai.h"
 #include "esp_twai_onchip.h"
 #include "can_2_mqtt.h"
+#include "mqtt_stuff.h"
 
 static const char* TAG = "CAN_2_MQTT_TASK";
 static twai_node_handle_t node_hdl = NULL;
@@ -103,11 +104,38 @@ static bool IRAM_ATTR twai_rx_done_callback(twai_node_handle_t handle,
     return (higher_prio_woken == pdTRUE);
 }
 
+#define SEND_AS_JSON 0  //0 to send as raw binary, 1 to send as json
+#define MQTT_WORKING 0  //keep this 0 while working on the mqtt  
 
-static void flush_can2mqttbuffer(rx_msg_buffer_t* buffer)
+static void flush_can2mqttbuffer(rx_msg_buffer_t* buffer, esp_mqtt_client_handle_t client)
 {
+
     /*  TODO: actually send the full buffer to the MQTT packet here */
     ESP_LOGI(TAG, "Buffer full, flushing %d frames at %llu us", CAN_2_MQTT_BUFFER_SIZE, esp_timer_get_time());
+    #if MQTT_WORKING
+    mqttWaitUntilConnected();
+
+    #if SEND_AS_JSON
+            //TODO: add JSON send code here for debugging/testing
+
+    #else       
+        int msg_id = esp_mqtt_client_publish(
+        client,
+        CAN_2_MQTT_TOPIC,                                           // topic
+        (const char*)buffer,                                    // payload — raw bytes
+        CAN_2_MQTT_BUFFER_SIZE * sizeof(rx_msg_buffer_t),      // length
+        0,                                                      // QoS 0, fire-and-forget
+        0                                                       // not retained
+    );
+
+
+    #endif
+    if (msg_id < 0) 
+    {
+        ESP_LOGE(TAG, "Publish failed");
+    }
+
+    #endif
     
     /*  Reset the buffer using memset, safe for a static buffer */
     memset(buffer, 0, CAN_2_MQTT_BUFFER_SIZE * sizeof(rx_msg_buffer_t));
@@ -124,7 +152,9 @@ void can_2_mqtt_task(void *pvParameters)
 
     static uint8_t currentMqttBufferIndex = 0;
 
-    
+    can_2_mqtt_task_params_t *mqttParams = (can_2_mqtt_task_params_t*)pvParameters;     //unlock the passed params
+    esp_mqtt_client_handle_t mqttClient = mqttParams->mqtt_client;  //now we can use mqttClient as a reference
+
        while(1)
     {
         /*  Block until a frame arrives from ISR   */
@@ -137,7 +167,7 @@ void can_2_mqtt_task(void *pvParameters)
             if (currentMqttBufferIndex >= CAN_2_MQTT_BUFFER_SIZE)
             {
                 ESP_LOGI(TAG, "CAN_2_MQTT depth at flush: %lu", uxQueueMessagesWaiting(can_2_mqtt_queue));
-                flush_can2mqttbuffer(mqttBuffer);
+                flush_can2mqttbuffer(mqttBuffer, mqttClient);
                 currentMqttBufferIndex = 0;
             }
         }

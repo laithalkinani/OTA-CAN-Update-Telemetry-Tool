@@ -3,7 +3,7 @@
 
 #include "mqtt_client.h"
 
-const char* CAN_2_MQTT_TOPIC = "can/frames";
+#define CAN_2_MQTT_TOPIC "can/frames"
 
 /* global context struct, can be shared between can2mqtt and mqtt2can tasks */
 typedef struct {

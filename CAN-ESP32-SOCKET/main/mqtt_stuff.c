@@ -39,7 +39,6 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         case MQTT_EVENT_CONNECTED:
             xEventGroupSetBits(s_mqtt_event_group, MQTT_CONNECTED_BIT);
             xEventGroupClearBits(s_mqtt_event_group, MQTT_DISCONNECTED_BIT);
-            esp_mqtt_client_subscribe(event->client, "can/frames", 0);
             #if MQTT_TEST
             ESP_LOGI(MQTT_TAG, "MQTT connected.");
             #endif

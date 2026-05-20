@@ -44,7 +44,7 @@ void loop() {
   Serial.print("]: ");
 
   // Create frame with CURRENT data
-  CANFrame frame(0x100, data, sizeof(data));
+  CANFrame frame(0x111, data, sizeof(data));
   
   CANController::IOResult result = CAN.write(frame);
   

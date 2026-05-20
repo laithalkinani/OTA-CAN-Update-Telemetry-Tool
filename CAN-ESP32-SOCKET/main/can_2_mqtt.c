@@ -10,18 +10,19 @@
 
 static const char* TAG = "CAN_2_MQTT_TASK";
 static twai_node_handle_t node_hdl = NULL;
-static rx_msg_buffer_t rx_buffer;       //rx_buffer is the "glue" buffer between ISR and task, contains header and payload
+static rx_msg_buffer_t rx_buffer;       //rx_buffer is the global "glue" buffer between ISR and task, contains header and payload
 static QueueHandle_t can_2_mqtt_queue = NULL;
 
-/*  Forward Declarations    */
+/*  Forward Declaration of callback  */
 
 static bool twai_rx_done_callback(twai_node_handle_t handle,
                                             const twai_rx_done_event_data_t *edata,
                                             void *user_ctx);
 
+//TODO: is there a better way to do this? that's more direct? research the concept of interface
 /*  Point hardware FIFO buffer to "glue" buffer */
 twai_frame_t rx_frame = {
-    .buffer = rx_buffer.canPayload,         //now rx_frame.buffer points to rx_buffer.canPayload
+    .buffer = rx_buffer.canPayload,                 //now rx_frame.buffer points to rx_buffer.canPayload
     .buffer_len = sizeof(rx_buffer.canPayload),     //now points to size of payload (8 bytes)
 };
 
@@ -81,31 +82,31 @@ void twai_init()
 @ret: bool that new msg has been queued
 */
 static bool IRAM_ATTR twai_rx_done_callback(twai_node_handle_t handle,
-                                            const twai_rx_done_event_data_t *edata,
-                                            void *user_ctx)
+                                             const twai_rx_done_event_data_t *edata,
+                                             void *user_ctx)
 {
-    
-    /*  "Interrupt flag" for callback   */
     BaseType_t higher_prio_woken = pdFALSE;
-    
-    /*  Read from hardware FIFO into rx_frame, which points to rx_buffer    */
-    if (twai_node_receive_from_isr(handle, &rx_frame) == ESP_OK)        //Note: we need to read from callback, according to API documentation
-    {      
-        /*  Copy header */
-        rx_buffer.header = rx_frame.header;                             //Note: no len field needed because len is encoded in the DLC field of the CAN header
-        
-        /*  Timestamp   */
-        rx_buffer.header.timestamp = (uint64_t)esp_timer_get_time();
 
-        /*  Queue the message into the can_2_mqtt_queue */
+    /* we need to copy every header field individually, to enforce bitpacking, which makes parsing easier*/
+    if (twai_node_receive_from_isr(handle, &rx_frame) == ESP_OK)
+    {
+        rx_buffer.header.id        = rx_frame.header.id;
+        rx_buffer.header.dlc       = rx_frame.header.dlc;
+        rx_buffer.header.flags     = (rx_frame.header.ide & 0x1)
+                                   | (rx_frame.header.rtr & 0x1) << 1
+                                   | (rx_frame.header.fdf & 0x1) << 2
+                                   | (rx_frame.header.brs & 0x1) << 3
+                                   | (rx_frame.header.esi & 0x1) << 4;
+        rx_buffer.header.timestamp = (uint64_t)esp_timer_get_time();        
+
         xQueueSendFromISR(can_2_mqtt_queue, &rx_buffer, &higher_prio_woken);
     }
-    
+
     return (higher_prio_woken == pdTRUE);
 }
 
 #define SEND_AS_JSON 0  //0 to send as raw binary, 1 to send as json
-#define MQTT_WORKING 0  //keep this 0 while working on the mqtt  
+#define MQTT_WORKING 1  //keep this 0 while working on the mqtt  
 
 static void flush_can2mqttbuffer(rx_msg_buffer_t* buffer, esp_mqtt_client_handle_t client)
 {
@@ -113,7 +114,7 @@ static void flush_can2mqttbuffer(rx_msg_buffer_t* buffer, esp_mqtt_client_handle
     /*  TODO: actually send the full buffer to the MQTT packet here */
     ESP_LOGI(TAG, "Buffer full, flushing %d frames at %llu us", CAN_2_MQTT_BUFFER_SIZE, esp_timer_get_time());
     #if MQTT_WORKING
-    mqttWaitUntilConnected();
+    mqttWaitUntilConnected();           //TODO: this is blocking
 
     #if SEND_AS_JSON
             //TODO: add JSON send code here for debugging/testing
@@ -127,6 +128,7 @@ static void flush_can2mqttbuffer(rx_msg_buffer_t* buffer, esp_mqtt_client_handle
         0,                                                      // QoS 0, fire-and-forget
         0                                                       // not retained
     );
+
 
 
     #endif

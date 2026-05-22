@@ -31,24 +31,23 @@ def message():
     return render_template("message/message.html")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True) 
 
 '''
-
 from flask import Flask, render_template
 from flask_socketio import SocketIO
 import paho.mqtt.client as mqtt
 import os
 
 app = Flask(__name__,
-            template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'),
-            static_folder=os.path.join(os.path.dirname(__file__), '..', 'static'),
+            template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
+            static_folder=os.path.join(os.path.dirname(__file__), 'static'),
             static_url_path='')
 
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # ── MQTT ──────────────────────────────────────────────────────────────────────
-MQTT_BROKER = "localhost"
+MQTT_BROKER = "192.168.1.122"
 MQTT_PORT   = 1883
 MQTT_TOPIC  = "vehicle/#"
 
@@ -56,6 +55,7 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_TOPIC)
 
 def on_message(client, userdata, msg):
+    print(f"Flask received: {msg.topic} -> {msg.payload.decode()}")
     socketio.emit("can_data", {
         "topic": msg.topic,
         "data":  msg.payload.decode()
@@ -70,7 +70,7 @@ mqtt_client.loop_start()
 # ── Routes ────────────────────────────────────────────────────────────────────
 @app.route("/")
 def dashboard():
-    return render_template("dashboard/index.html")
+    return render_template("dashboard/index copy.html")
 
 @app.route("/login")
 def login():
@@ -82,9 +82,9 @@ def pastlog():
 
 @app.route("/checkpoint-login")
 def checkpoint_login():
-    return render_template("checkpoint_login/checkpoint_login.html")  # fixed path
+    return render_template("checkpoint_login/checkpoint_login.html") 
 
-@app.route("/checkpoint")
+@app.route("/checkpoint")  
 def checkpoint():
     return render_template("checkpoint/checkpoint1.html")
 
@@ -94,5 +94,5 @@ def message():
 
 # ── Run ───────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True)
-    '''
+    socketio.run(app, host="0.0.0.0", port=5001, debug=True)
+   '''

@@ -10,7 +10,7 @@ mqtt_stuff.c - where mqtt setup lives
 #include "mqtt_stuff.h"
 #include "mqtt_client.h"
 
-static const char* BROKER_ADDRESS = "mqtt://24.57.66.230:1883";
+static const char* BROKER_ADDRESS = "mqtt://broker.hivemq.com:1883";       //hivemq 
 
 static const char* MQTT_TAG = "MQTT_STUFF";
 static EventGroupHandle_t s_mqtt_event_group;

@@ -93,7 +93,7 @@ static bool IRAM_ATTR twai_rx_done_callback(twai_node_handle_t handle,
         rx_buffer.header.id        = rx_frame.header.id;
         rx_buffer.header.dlc       = rx_frame.header.dlc;
         rx_buffer.header.flags     = (rx_frame.header.ide & 0x1)
-                                   | (rx_frame.header.rtr & 0x1) << 1
+                                   | (rx_frame.header.rtr & 0x1) << 1       //this is the order from the twai struct
                                    | (rx_frame.header.fdf & 0x1) << 2
                                    | (rx_frame.header.brs & 0x1) << 3
                                    | (rx_frame.header.esi & 0x1) << 4;

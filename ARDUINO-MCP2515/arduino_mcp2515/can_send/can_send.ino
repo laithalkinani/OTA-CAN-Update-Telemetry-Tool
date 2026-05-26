@@ -1,83 +1,76 @@
 #include "AA_MCP2515.h"
 
 const CANBitrate::Config CAN_BITRATE = CANBitrate::Config_8MHz_500kbps;
-const uint8_t CAN_PIN_CS = 10;
-const int8_t CAN_PIN_INT = 2;
-const uint32_t CAN_SPI_HZ = 2000000;
+const uint8_t  CAN_PIN_CS  = 10;
+const int8_t   CAN_PIN_INT = 2;
+const uint32_t CAN_SPI_HZ  = 2000000;
 CANConfig config(CAN_BITRATE, CAN_PIN_CS, CAN_PIN_INT, SPI, CAN_SPI_HZ);
-
 CANController CAN(config);
 
-uint8_t data[8] = {0};
+uint8_t simVal = 0;  // 0–100, wraps
+
+void packSignalBE(uint8_t* buf, uint8_t startBit, uint8_t bitLen, uint32_t rawVal) {
+  for (int8_t i = bitLen - 1; i >= 0; i--) {
+    uint8_t bitVal  = (rawVal >> (bitLen - 1 - i)) & 0x01;
+    uint8_t dbcBit  = startBit - i;
+    uint8_t byteIdx = dbcBit / 8;
+    uint8_t bitIdx  = dbcBit % 8;
+    if (bitVal) buf[byteIdx] |=  (1 << bitIdx);
+    else        buf[byteIdx] &= ~(1 << bitIdx);
+  }
+}
+
+void build_6B0(uint8_t* buf) {
+  memset(buf, 0, 8);
+  packSignalBE(buf,  7, 16, (uint32_t)simVal * 10);        // Pack_Current: 0–100 A
+  packSignalBE(buf, 23, 16, 3000 + (uint32_t)simVal * 10); // Pack_Inst_Voltage: 300–400 V
+  packSignalBE(buf, 39,  8, (uint32_t)simVal * 2);         // Pack_SOC: 0–100%
+}
+
+void build_6B1(uint8_t* buf) {
+  memset(buf, 0, 8);
+  uint8_t high_temp = 20 + (uint8_t)((simVal * 40UL) / 100); // High_Temp: 20–60 °C
+  uint8_t low_temp  = 10 + (uint8_t)((simVal * 40UL) / 100); // Low_Temp:  10–50 °C
+  packSignalBE(buf, 39, 8, high_temp);
+  packSignalBE(buf, 47, 8, low_temp);
+}
+
+void sendFrame(uint16_t id, uint8_t* buf) {
+  CANFrame frame(id, buf, 8);
+  CANController::IOResult r = CAN.write(frame);
+
+  Serial.print("0x"); Serial.print(id, HEX);
+  Serial.print(" [");
+  for (int i = 0; i < 8; i++) {
+    if (buf[i] < 0x10) Serial.print("0");
+    Serial.print(buf[i], HEX);
+    if (i < 7) Serial.print(" ");
+  }
+  Serial.print("] simVal="); Serial.print(simVal);
+  Serial.println(r == CANController::IOResult::OK ? " OK" : " FAIL");
+}
 
 void setup() {
   Serial.begin(115200);
   delay(1000);
   Serial.println("Initializing CAN...");
-
   while (CAN.begin(CANController::Mode::Normal) != CANController::OK) {
-    Serial.println("[ERROR] CAN.begin() failed. Retrying...");
+    Serial.println("[ERROR] Retrying...");
     delay(1000);
   }
   Serial.println("[OK] CAN initialized");
 }
 
-// Increment 64-bit counter (little-endian: data[0] is LSB)
-void increment_counter() {
-  for (uint8_t i = 0; i < 8; i++) {
-    data[i]++;
-    if (data[i] != 0) {
-      break;  // No carry needed
-    }
-    // If data[i] wrapped to 0, carry to next byte
-  }
-}
-
 void loop() {
-  // Print current counter value
-  Serial.print("TX [");
-  for (int i = 7; i >= 0; i--) {  // Print MSB first
-    if (data[i] < 0x10) Serial.print("0");
-    Serial.print(data[i], HEX);
-    if (i > 0) Serial.print(" ");
-  }
-  Serial.print("]: ");
+  uint8_t buf[8];
 
-  // Create frame with CURRENT data
-  CANFrame frame(0x111, data, sizeof(data));
-  
-  CANController::IOResult result = CAN.write(frame);
-  
-  if (result == CANController::IOResult::OK) {
-    Serial.println("OK");
-  } else {
-    Serial.print("FAIL (");
-    Serial.print(static_cast<int>(result));
-    Serial.println(")");
-    
-    // Only print errors on failure
-    CANErrors errs = CAN.getErrors();
-    Serial.print("  TEC: ");
-    Serial.print(errs.errorCountTx);
-    Serial.print(" REC: ");
-    Serial.println(errs.errorCountRx);
-  }
+  build_6B0(buf);
+  sendFrame(0x6B0, buf);
 
-  // Increment for next message
-  increment_counter();
-  
-  // Check for rollover (back to all zeros)
-  bool all_zero = true;
-  for (uint8_t i = 0; i < 8; i++) {
-    if (data[i] != 0) {
-      all_zero = false;
-      break;
-    }
-  }
-  if (all_zero) {
-    Serial.println("*** COUNTER ROLLED OVER (2^64 messages sent) ***");
-    delay(5000);  // Pause to notice
-  }
-  
-  // delay(100);  // 10 messages/sec = reasonable rate
+  build_6B1(buf);
+  sendFrame(0x6B1, buf);
+
+  simVal++;
+  if (simVal > 100) simVal = 0;
+
 }

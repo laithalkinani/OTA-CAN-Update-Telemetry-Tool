@@ -1,3 +1,4 @@
+
 from flask import Flask, redirect, url_for, render_template
 import os
 
@@ -8,7 +9,7 @@ app = Flask(__name__,
 
 @app.route("/")
 def dashboard():
-    return render_template("dashboard/index.html")
+    return render_template("dashboard/index copy.html")
 
 @app.route("/login")
 def login():
@@ -31,7 +32,9 @@ def message():
     return render_template("message/message.html")
 
 if __name__ == "__main__":
-    app.run(debug=True) 
+    app.run(debug=True, port=5002)
+
+
 
 '''
 from flask import Flask, render_template
@@ -47,9 +50,9 @@ app = Flask(__name__,
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 # ── MQTT ──────────────────────────────────────────────────────────────────────
-MQTT_BROKER = "192.168.1.122"
+MQTT_BROKER = "broker.hivemq.com"
 MQTT_PORT   = 1883
-MQTT_TOPIC  = "vehicle/#"
+MQTT_TOPIC  = "vehicle/signals"
 
 def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_TOPIC)

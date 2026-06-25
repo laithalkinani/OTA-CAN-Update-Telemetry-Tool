@@ -56,11 +56,11 @@
         <div class="card mb-0">
           <div class="card-body py-3">
             <div class="row g-2">
-              <div class="col-4 col-md-2"><button class="btn btn-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1 active" data-stat="1" onclick="selectStat(1)"><i class="material-icons-two-tone" style="font-size:26px">battery_charging_full</i><span class="fw-bold">Stat 1</span></button></div>
-              <div class="col-4 col-md-2"><button class="btn btn-outline-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1" data-stat="2" onclick="selectStat(2)"><i class="material-icons-two-tone" style="font-size:26px">bolt</i><span class="fw-bold">Stat 2</span></button></div>
-              <div class="col-4 col-md-2"><button class="btn btn-outline-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1" data-stat="3" onclick="selectStat(3)"><i class="material-icons-two-tone" style="font-size:26px">speed</i><span class="fw-bold">Stat 3</span></button></div>
-              <div class="col-4 col-md-2"><button class="btn btn-outline-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1" data-stat="4" onclick="selectStat(4)"><i class="material-icons-two-tone" style="font-size:26px">thermostat</i><span class="fw-bold">Stat 4</span></button></div>
-              <div class="col-4 col-md-2"><button class="btn btn-outline-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1" data-stat="5" onclick="selectStat(5)"><i class="material-icons-two-tone" style="font-size:26px">rotate_right</i><span class="fw-bold">Stat 5</span></button></div>
+              <div class="col-4 col-md-2"><button class="btn btn-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1 active" data-stat="1" onclick="selectStat(1)"><i class="material-icons-two-tone" style="font-size:26px">battery_charging_full</i><span class="fw-bold">Current</span></button></div>
+              <div class="col-4 col-md-2"><button class="btn btn-outline-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1" data-stat="2" onclick="selectStat(2)"><i class="material-icons-two-tone" style="font-size:26px">bolt</i><span class="fw-bold">Voltage</span></button></div>
+              <div class="col-4 col-md-2"><button class="btn btn-outline-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1" data-stat="3" onclick="selectStat(3)"><i class="material-icons-two-tone" style="font-size:26px">speed</i><span class="fw-bold">Battery SOC</span></button></div>
+              <div class="col-4 col-md-2"><button class="btn btn-outline-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1" data-stat="4" onclick="selectStat(4)"><i class="material-icons-two-tone" style="font-size:26px">thermostat</i><span class="fw-bold">Temp High</span></button></div>
+              <div class="col-4 col-md-2"><button class="btn btn-outline-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1" data-stat="5" onclick="selectStat(5)"><i class="material-icons-two-tone" style="font-size:26px">rotate_right</i><span class="fw-bold">Temp Low</span></button></div>
               <div class="col-4 col-md-2"><button class="btn btn-outline-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1" data-stat="6" onclick="selectStat(6)"><i class="material-icons-two-tone" style="font-size:26px">timeline</i><span class="fw-bold">Stat 6</span></button></div>
             </div>
           </div>
@@ -73,7 +73,7 @@
       <div class="col-12">
         <div class="card mb-0">
           <div class="card-header d-flex justify-content-between align-items-center py-2">
-            <h5 id="graph-title" class="mb-0">Stat 1 — Live Data (30 min window)</h5>
+            <h5 id="graph-title" class="mb-0"> Current — Current (A) (Live)</h5>
             <div class="d-flex align-items-center gap-2">
               <button class="btn btn-sm btn-outline-secondary" id="toggle-markers-btn" onclick="toggleMarkers()" title="Toggle point values">
                 <i class="material-icons-two-tone" style="font-size:16px;vertical-align:middle">scatter_plot</i>
@@ -109,7 +109,7 @@
                         <i class="material-icons-two-tone" id="sort-icon" style="font-size:22px;vertical-align:middle;filter:brightness(4);">unfold_more</i>
                       </button>
                     </th>
-                    <th style="width:33.3%;text-align:center;padding:12px 8px;background:#2d2d3f;color:#c5cbe0;border-bottom:2px solid #6610f2;">Time Elapsed</th>
+                    <th style="width:33.3%;text-align:center;padding:12px 8px;background:#2d2d3f;color:#c5cbe0;border-bottom:2px solid #6610f2;">Time Elapsed (HH:MM:SS.ms.µs)</th>
                     <th id="value-col-header" style="width:33.3%;text-align:center;padding:12px 8px;background:#2d2d3f;color:#c5cbe0;border-bottom:2px solid #6610f2;">Value</th>
                   </tr>
                 </thead>
@@ -133,12 +133,11 @@
 <script src="../assets/js/plugins/feather.min.js"></script>
 <script>
 const STATS = [
-    { label: 'Battery',    unit: 'Battery (%)' },
     { label: 'Current',    unit: 'Current (A)' },
-    { label: 'Speed',      unit: 'Speed (km/h)' },
-    { label: 'Temp',       unit: 'Temp (°C)' },
-    { label: 'RPM',        unit: 'RPM' },
-    { label: 'Efficiency', unit: 'Efficiency (%)' }
+    { label: 'Voltage',    unit: 'Voltage (V)' },
+    { label: 'Battery_SOC',      unit: 'Battery_SOC (%)' },
+    { label: 'Temp_High',       unit: 'Temp (°C)' },
+    { label: 'Temp_Low',        unit: 'Temp (°C)' },
 ];
 
 let chart = null, currentRows = [], sortNewestFirst = true, showMarkers = false;
@@ -221,7 +220,55 @@ layout_sidebar_change('dark');
     
     
   const socket = io();
-  
+
+  // Listen for CAN data from the server
+ 
+  socket.on("can_data", function(msg) {
+    const parsed = JSON.parse(msg.data);
+    
+    const signal = parsed.signal;
+    const timeStr = parsed.timestamp;  // use decoder timestamp directly
+    
+    // convert delta_us to elapsed format HH:MM:SS.mmm
+    const totalUs = parsed.total_elapsed_us || 0;
+    
+    const pad = n => n.toString().padStart(2,'0');
+    const hours   = Math.floor(totalUs / 3600000000);
+    const minutes = Math.floor((totalUs % 3600000000) / 60000000);
+    const seconds = Math.floor((totalUs % 60000000) / 1000000);
+    const ms      = Math.floor((totalUs % 1000000) / 1000);
+    const us      = totalUs % 1000;
+    const elapsed = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${ms.toString().padStart(3,'0')}.${us.toString().padStart(3,'0')}`;
+
+    if (!liveData[signal]) liveData[signal] = { points: [], rows: [] };
+
+    const now = new Date().getTime();
+    liveData[signal].points.push({ x: now, y: parsed.value });
+    liveData[signal].rows.unshift({ 
+        time: timeStr,   // decoder timestamp HH:MM:SS.mmm
+        elapsed: elapsed, // microsecond precision elapsed
+        val: parsed.value, 
+        ts: now 
+    });
+
+    if (chart && STATS[currentStat] && STATS[currentStat].label === signal) {
+        chart.appendData([{ data: [{ x: now, y: parsed.value }] }]);
+
+        const firstPoint = liveData[signal].points[0].x;
+        const windowEnd = Math.max(now, firstPoint + 0.5 * 60 * 1000);
+        chart.updateOptions({
+            xaxis: {
+                min: windowEnd - 0.5 * 60 * 1000,
+                max: windowEnd
+            }
+        }, false, false);
+
+        currentRows = liveData[signal].rows;
+        renderTable();
+    }
+});
+
+  /*
   socket.on("can_data", function(msg) {
       const parsed = JSON.parse(msg.data);
       const now = new Date().getTime();
@@ -257,8 +304,8 @@ layout_sidebar_change('dark');
           currentRows = liveData[signal].rows;
           renderTable();
       }
-  });
-          
+  }); */
+        
     
 </script>
 

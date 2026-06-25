@@ -1,86 +1,141 @@
 /*
 wifi_stuff.c
-Purpose: TCP client in esp32
+Purpose: wi-fi init in esp32
 Author: Laith Al-Kinani
 */
 
 #include "esp_err.h"
 #include "wifi_stuff.h" //function prototypes macros etc.
-#include "mcp2515_driver.h"
+#include "driver/gpio.h"
 #include "sdkconfig.h"
 #include "esp_netif.h"
+#include "esp_event.h"
 #include "esp_wifi.h"
 #include "esp_log.h"
 #include <sys/socket.h>
 #include <string.h>
 #include <errno.h>
+#include "lwip/err.h"
+#include "lwip/sys.h"
 
-static const char* WIFI_TAG = "WIFI_STUFF";
+#define WIFI_CONNECTED_BIT  BIT0
+#define WIFI_FAIL_BIT       BIT1
+#define MAX_WIFI_CONNECT_RETRIES ((uint16_t)500)
 
-esp_err_t createClient(void)
+static const char* WIFI_TAG = "WIFI_INIT";
+
+static const char* SSID = "Laith\xE2\x80\x99s iPhone";  //special apostrophe character encoding for iphone
+static const char* password =   "laithiscool";
+
+static uint16_t s_retry_num = 0;
+
+
+static EventGroupHandle_t s_wifi_event_group;
+
+
+
+static void wifiEventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data)
 {
-    //using ipv4 btw
-
-    //init the socket address/port/stream 
-
-    esp_err_t err = ESP_FAIL;
-    //TODO: no semaphore stuff here yet. just send any payload over TCP to validate that it works
-
-
-    //TODO: change this to just some string like "foo" to validate CAN-TCP connection
-    char *payload = "foo"; //this should be the CAN package
-    //you may have to cast the can package to const char* later
-    //just be careful because this is shared resource with core 0
-    //so this will be a binary semaphore later
-    struct sockaddr_in dest_addr;
-    dest_addr.sin_addr.s_addr = inet_addr(HOST_IP); //internet address
-    dest_addr.sin_family = AF_INET; //using ipv4
-    dest_addr.sin_port = htons(PORT); //which port we are binding our socket to
-
-    //create the TCP socket
-
-    int sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0)
+    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
     {
-        ESP_LOGE(WIFI_TAG, "Unable to create socket: %d", errno);
-        return err;
+        esp_wifi_connect();
+        
     }
 
-    ESP_LOGI(WIFI_TAG, "Socket created, connecting to %s:%d", HOST_IP, PORT);
-
-    int ret = connect(sock, (struct sockaddr*)&dest_addr, sizeof(dest_addr)); //bind socket to port
-    if (ret != 0)
+    else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
     {
-        ESP_LOGE(WIFI_TAG, "Unable to connect to socket: errno %d", errno);
-        close(sock);
-        return err;
-    }
-    ESP_LOGI(WIFI_TAG, "Successfully socketed!");
-
-    //now send the data over TCP
-
-    int meow = send(sock, payload, strlen(payload), 0);
-    if (meow < 0)
-    {
-        ESP_LOGE(WIFI_TAG, "Error occured during sending: errno %d", errno);
-        goto exit;
+        gpio_set_level(WIFI_STATUS_LED, 0);
+        if (s_retry_num < MAX_WIFI_CONNECT_RETRIES)
+        {
+            esp_wifi_connect();         //try again
+            s_retry_num++;
+            ESP_LOGI(WIFI_TAG, "Retrying to connect to the AP...");
+           
+        }
+        else
+        {
+            xEventGroupSetBits(s_wifi_event_group, WIFI_FAIL_BIT);
+        }
+        ESP_LOGI(WIFI_TAG, "FAILED to connect to the AP.");
     }
 
-    exit:
-        shutdown(sock,0);
-        close(sock);
-        return err; 
-    //have something here to handle a successful send - i.e closing the socket still
+    else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
+    {
+        gpio_set_level(WIFI_STATUS_LED, 1);
+        ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
+        ESP_LOGI(WIFI_TAG, "Got IP address: " IPSTR, IP2STR(&event->ip_info.ip));
+        s_retry_num = 0;
+        xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
+    }
 }
 
-void tcp_client(void *arg)
+
+void initWifiSta(void)
 {
-    createClient();
-    while(1)
+    s_wifi_event_group = xEventGroupCreate();
+
+    gpio_reset_pin(WIFI_STATUS_LED);
+    gpio_set_direction(WIFI_STATUS_LED, GPIO_MODE_OUTPUT);
+
+    esp_netif_create_default_wifi_sta();
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
+    esp_event_handler_instance_t instance_any_id;
+    esp_event_handler_instance_t instance_got_ip;
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(WIFI_EVENT,
+                                                        ESP_EVENT_ANY_ID,
+                                                        &wifiEventHandler,
+                                                        NULL,
+                                                        &instance_any_id));
+    ESP_ERROR_CHECK(esp_event_handler_instance_register(IP_EVENT,
+                                                        IP_EVENT_STA_GOT_IP,
+                                                        &wifiEventHandler,
+                                                        NULL,
+                                                        &instance_got_ip));
+
+    wifi_config_t wifi_config = {0};
+    memcpy(wifi_config.sta.ssid, SSID, strlen(SSID)); 
+    wifi_config.sta.password[sizeof(wifi_config.sta.password) - 1] = 0;  // safety null-term
+    strncpy((char*)wifi_config.sta.password, password, sizeof(wifi_config.sta.password) - 1);
+    wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;        //forcing WPA2
+    
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config) );
+    ESP_ERROR_CHECK(esp_wifi_start() );
+
+    ESP_LOGI(WIFI_TAG, "Wi-Fi Station Init completed.");
+
+    EventBits_t bits = xEventGroupWaitBits(s_wifi_event_group,
+            WIFI_CONNECTED_BIT | WIFI_FAIL_BIT,
+            pdFALSE,
+            pdFALSE,
+            portMAX_DELAY);
+    
+
+    if (bits & WIFI_CONNECTED_BIT)
     {
-        vTaskDelay(pdMS_TO_TICKS(10));
+        ESP_LOGI(WIFI_TAG, "Connected to AP with SSID: %s PW: %s", SSID, password);
+        
     }
+    else if (bits & WIFI_FAIL_BIT)
+    {
+        ESP_LOGI(WIFI_TAG, "FAILED to connect to Wi-Fi...!!!!");
+    }
+    else
+    {
+        ESP_LOGI(WIFI_TAG, "Unexpected event!");
+    }
+    
 }
+
+
+
+
+
+
+
+
 
 
 

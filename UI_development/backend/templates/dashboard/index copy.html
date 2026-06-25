@@ -1,0 +1,313 @@
+<!doctype html><html lang="en">
+<head><title>Dashboard | FSAE Telemetry</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0,minimal-ui"><meta http-equiv="X-UA-Compatible" content="IE=edge"><link rel="icon" href="../assets/images/favicon.svg" type="image/x-icon"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@700..700&display=swap" rel="stylesheet"><link rel="stylesheet" href="../assets/fonts/phosphor/duotone/style.css"><link rel="stylesheet" href="../assets/fonts/tabler-icons.min.css"><link rel="stylesheet" href="../assets/fonts/feather.css"><link rel="stylesheet" href="../assets/fonts/fontawesome.css"><link rel="stylesheet" href="../assets/fonts/material.css"><link rel="stylesheet" href="../assets/css/style.css" id="main-style-link">
+<style>#sort-icon { color: #c5cbe0 !important; }</style>
+</head>
+<body data-pc-preset="preset-1" data-pc-sidebar-theme="dark" data-pc-header-theme="dark" data-pc-sidebar-caption="true" data-pc-direction="ltr" data-pc-theme="dark">
+<div class="loader-bg"><div class="pc-loader"><div class="loader-fill"></div></div></div>
+<nav class="pc-sidebar"><div class="navbar-wrapper"><div class="m-header"><a href="/" class="b-brand text-primary"><img src="../assets/images/logo-white.svg" alt="logo image" class="logo-lg"></a></div><div class="navbar-content"><ul class="pc-navbar">
+<li class="pc-item pc-caption"><label>NAVIGATION</label></li>
+<li class="pc-item active"><a href="/" class="pc-link"><span class="pc-micon"><i class="material-icons-two-tone">dashboard</i></span><span class="pc-mtext">Dashboard</span></a></li>
+<li class="pc-item pc-caption"><label>PAGES</label></li>
+<li class="pc-item"><a href="/pastlog" class="pc-link"><span class="pc-micon"><i class="material-icons-two-tone">history</i></span><span class="pc-mtext">Past Log</span></a></li>
+<li class="pc-item"><a href="/checkpoint" class="pc-link"><span class="pc-micon"><i class="material-icons-two-tone">flag</i></span><span class="pc-mtext">Checkpoint</span></a></li>
+<li class="pc-item"><a href="/message" class="pc-link"><span class="pc-micon"><i class="material-icons-two-tone">lock</i></span><span class="pc-mtext">Message</span></a></li>
+</ul></div></div></nav>
+<header class="pc-header"><div class="header-wrapper"><div class="me-auto pc-mob-drp"><ul class="list-unstyled"><li class="pc-h-item pc-sidebar-collapse"><a href="#" class="pc-head-link ms-0" id="sidebar-hide"><i class="material-icons-two-tone">menu</i></a></li><li class="pc-h-item pc-sidebar-popup"><a href="#" class="pc-head-link ms-0" id="mobile-collapse"><i class="material-icons-two-tone">menu</i></a></li></ul></div>
+<div class="ms-auto"><ul class="list-unstyled">
+<li class="dropdown pc-h-item header-user-profile">
+  <a class="pc-head-link dropdown-toggle arrow-none me-0" data-bs-toggle="dropdown" href="#" role="button" aria-haspopup="false" data-bs-auto-close="outside" aria-expanded="false">
+    <i class="material-icons-two-tone">account_circle</i>
+    <span class="ms-2"><span class="user-name">User</span> <span class="user-desc">Team Member</span></span>
+  </a>
+  <div class="dropdown-menu dropdown-user-profile dropdown-menu-end pc-h-dropdown">
+    <div class="dropdown-header d-flex align-items-center justify-content-between"><h4 class="m-0">Profile</h4></div>
+    <div class="dropdown-body">
+      <div class="profile-notification-scroll position-relative" style="max-height: calc(100vh - 225px)">
+        <ul class="list-group list-group-flush w-100">
+          <li class="list-group-item">
+            <div class="d-flex align-items-center">
+              <div class="flex-shrink-0"><i class="material-icons-two-tone" style="font-size:50px;">account_circle</i></div>
+              <div class="flex-grow-1 mx-3"><h5 class="mb-0">User</h5><span class="text-sm link-secondary">Team Member</span></div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</li>
+</ul></div></div></header>
+<div class="pc-container">
+  <div class="pc-content">
+
+    <div class="page-header mb-2">
+      <div class="page-block">
+        <div class="row align-items-center">
+          <div class="col-md-12">
+            <div class="page-header-title"><h5 class="m-b-5">Live Telemetry</h5></div>
+            <ul class="breadcrumb"><li class="breadcrumb-item">Dashboard</li><li class="breadcrumb-item">Live Telemetry</li></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat Buttons -->
+    <div class="row mb-2">
+      <div class="col-12">
+        <div class="card mb-0">
+          <div class="card-body py-3">
+            <div class="row g-2">
+              <div class="col-4 col-md-2"><button class="btn btn-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1 active" data-stat="1" onclick="selectStat(1)"><i class="material-icons-two-tone" style="font-size:26px">battery_charging_full</i><span class="fw-bold">Current</span></button></div>
+              <div class="col-4 col-md-2"><button class="btn btn-outline-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1" data-stat="2" onclick="selectStat(2)"><i class="material-icons-two-tone" style="font-size:26px">bolt</i><span class="fw-bold">Voltage</span></button></div>
+              <div class="col-4 col-md-2"><button class="btn btn-outline-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1" data-stat="3" onclick="selectStat(3)"><i class="material-icons-two-tone" style="font-size:26px">speed</i><span class="fw-bold">Battery SOC</span></button></div>
+              <div class="col-4 col-md-2"><button class="btn btn-outline-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1" data-stat="4" onclick="selectStat(4)"><i class="material-icons-two-tone" style="font-size:26px">thermostat</i><span class="fw-bold">Temp High</span></button></div>
+              <div class="col-4 col-md-2"><button class="btn btn-outline-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1" data-stat="5" onclick="selectStat(5)"><i class="material-icons-two-tone" style="font-size:26px">rotate_right</i><span class="fw-bold">Temp Low</span></button></div>
+              <div class="col-4 col-md-2"><button class="btn btn-outline-primary stat-btn w-100 py-3 d-flex flex-column align-items-center justify-content-center gap-1" data-stat="6" onclick="selectStat(6)"><i class="material-icons-two-tone" style="font-size:26px">timeline</i><span class="fw-bold">Stat 6</span></button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graph -->
+    <div class="row mb-2">
+      <div class="col-12">
+        <div class="card mb-0">
+          <div class="card-header d-flex justify-content-between align-items-center py-2">
+            <h5 id="graph-title" class="mb-0"> Current — Current (A) (Live)</h5>
+            <div class="d-flex align-items-center gap-2">
+              <button class="btn btn-sm btn-outline-secondary" id="toggle-markers-btn" onclick="toggleMarkers()" title="Toggle point values">
+                <i class="material-icons-two-tone" style="font-size:16px;vertical-align:middle">scatter_plot</i>
+                <span id="markers-label" style="font-size:12px">Show Points</span>
+              </button>
+              <span class="badge bg-success">LIVE</span>
+            </div>
+          </div>
+          <div class="card-body pt-2 pb-2">
+            <div style="overflow-x:auto;">
+              <div id="telemetry-chart" style="min-width:700px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card mb-0">
+          <div class="card-header py-2">
+            <h5 id="table-title" class="mb-0">Stat 1 — Data Log</h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive" style="max-height:480px;overflow-y:auto;">
+              <table class="table table-hover mb-0" style="table-layout:fixed;width:100%;">
+                <thead style="position:sticky;top:0;z-index:2;">
+                  <tr style="background:#2d2d3f;">
+                    <th style="width:33.3%;text-align:center;padding:12px 8px;background:#2d2d3f;color:#c5cbe0;border-bottom:2px solid #6610f2;">
+                      Actual Time
+                      <button class="btn btn-sm p-0 ms-1" id="sort-btn" onclick="toggleSort()" title="Toggle sort order" style="line-height:1;color:#c5cbe0;">
+                        <i class="material-icons-two-tone" id="sort-icon" style="font-size:22px;vertical-align:middle;filter:brightness(4);">unfold_more</i>
+                      </button>
+                    </th>
+                    <th style="width:33.3%;text-align:center;padding:12px 8px;background:#2d2d3f;color:#c5cbe0;border-bottom:2px solid #6610f2;">Time Elapsed (HH:MM:SS.ms.µs)</th>
+                    <th id="value-col-header" style="width:33.3%;text-align:center;padding:12px 8px;background:#2d2d3f;color:#c5cbe0;border-bottom:2px solid #6610f2;">Value</th>
+                  </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<footer class="pc-footer"><div class="footer-wrapper container-fluid"><div class="row"><div class="col my-1"><p class="m-0">UWindsor FSAE Telemetry</p></div></div></div></footer>
+<script src="../assets/js/plugins/apexcharts.min.js"></script>
+<script src="../assets/js/plugins/popper.min.js"></script>
+<script src="../assets/js/plugins/simplebar.min.js"></script>
+<script src="../assets/js/plugins/bootstrap.min.js"></script>
+<script src="../assets/js/fonts/custom-font.js"></script>
+<script src="../assets/js/pcoded.js"></script>
+<script src="../assets/js/plugins/feather.min.js"></script>
+<script>
+const STATS = [
+    { label: 'Current',    unit: 'Current (A)' },
+    { label: 'Voltage',    unit: 'Voltage (V)' },
+    { label: 'Battery_SOC',      unit: 'Battery_SOC (%)' },
+    { label: 'Temp_High',       unit: 'Temp (°C)' },
+    { label: 'Temp_Low',        unit: 'Temp (°C)' },
+];
+
+let chart = null, currentRows = [], sortNewestFirst = true, showMarkers = false;
+let sessionStart = null;
+let currentStat = 0;
+const liveData = {};
+
+function generateData(idx) {
+  const stat = STATS[idx], points = [], rows = [];
+  const now = new Date(), start = new Date(now.getTime() - 30 * 60 * 1000);
+  for (let i = 0; i <= 60; i++) {
+    const t = new Date(start.getTime() + i * 30 * 1000);
+    const val = parseFloat((stat.base + (Math.random() - 0.5) * stat.base * 0.15).toFixed(2));
+    points.push({ x: t.getTime(), y: val });
+    const pad = n => n.toString().padStart(2,'0');
+    const timeStr = `${pad(t.getHours())}:${pad(t.getMinutes())}:${pad(t.getSeconds())}`;
+    const totalSec = i * 30;
+    rows.push({ time: timeStr, elapsed: `00:${pad(Math.floor(totalSec/60))}:${pad(totalSec%60)}`, val, ts: t.getTime() });
+  }
+  return { points, rows, stat };
+}
+
+function renderTable() {
+  const sorted = [...currentRows].sort((a,b) => sortNewestFirst ? b.ts - a.ts : a.ts - b.ts);
+  document.getElementById('sort-icon').textContent = sortNewestFirst ? 'arrow_downward' : 'arrow_upward';
+  document.getElementById('table-body').innerHTML = sorted.map(r =>
+    `<tr><td style="text-align:center;width:33.3%">${r.time}</td><td style="text-align:center;width:33.3%">${r.elapsed}</td><td style="text-align:center;width:33.3%"><strong>${r.val}</strong></td></tr>`
+  ).join('');
+}
+
+function toggleSort() { sortNewestFirst = !sortNewestFirst; renderTable(); }
+
+function toggleMarkers() {
+  showMarkers = !showMarkers;
+  document.getElementById('markers-label').textContent = showMarkers ? 'Hide Points' : 'Show Points';
+  if (chart) chart.updateOptions({ markers: { size: showMarkers ? 4 : 0 }, dataLabels: { enabled: showMarkers, formatter: v => v.toFixed(1), style: { fontSize: '10px' } } });
+}
+
+function selectStat(num) {
+    const idx = num - 1;
+      currentStat = idx;
+      const stat = STATS[idx];
+      const signal = stat.label;
+      const points = liveData[signal] ? liveData[signal].points : [];
+      currentRows = liveData[signal] ? liveData[signal].rows : [];
+      
+  document.querySelectorAll('.stat-btn').forEach(b => { b.classList.remove('btn-primary','active'); b.classList.add('btn-outline-primary'); });
+  const btn = document.querySelector(`[data-stat="${num}"]`);
+  btn.classList.remove('btn-outline-primary'); btn.classList.add('btn-primary','active');
+  document.getElementById('graph-title').textContent = `${stat.label} — ${stat.unit} (Live)`;
+  document.getElementById('table-title').textContent = `${stat.label} — ${stat.unit} Data Log`;
+  document.getElementById('value-col-header').textContent = `Value (${stat.unit})`;
+  const options = {
+    chart: { type: 'area', height: 320, background: 'transparent', toolbar: { show: true }, animations: { enabled: true, speed: 400 } },
+    theme: { mode: 'dark' },
+    series: [{ name: stat.unit, data: points }],
+    xaxis: { type: 'datetime', title: { text: 'Actual Time', style: { color: '#aaa', fontSize: '12px' } }, labels: { datetimeUTC: false, format: 'HH:mm', style: { colors: '#aaa' } } },
+    yaxis: { title: { text: stat.unit, style: { color: '#aaa', fontSize: '12px' } }, labels: { formatter: v => v.toFixed(1), style: { colors: '#aaa' } } },
+    stroke: { curve: 'smooth', width: 2 },
+    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05 } },
+    colors: ['#6610f2'],
+    grid: { borderColor: '#2a2a2a' },
+    tooltip: { x: { format: 'HH:mm:ss' }, theme: 'dark' },
+    markers: { size: 0 },
+    dataLabels: { enabled: false }
+  };
+  if (chart) chart.destroy();
+  chart = new ApexCharts(document.querySelector('#telemetry-chart'), options);
+  chart.render();
+  renderTable();
+}
+
+document.addEventListener('DOMContentLoaded', () => { selectStat(1); });
+layout_change('dark');
+layout_sidebar_change('dark');
+</script>
+
+<script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+<script>
+    
+    
+  const socket = io();
+
+  // Listen for CAN data from the server
+ 
+  socket.on("can_data", function(msg) {
+    const parsed = JSON.parse(msg.data);
+    
+    const signal = parsed.signal;
+    const timeStr = parsed.timestamp;  // use decoder timestamp directly
+    
+    // convert delta_us to elapsed format HH:MM:SS.mmm
+    const totalUs = parsed.total_elapsed_us || 0;
+    
+    const pad = n => n.toString().padStart(2,'0');
+    const hours   = Math.floor(totalUs / 3600000000);
+    const minutes = Math.floor((totalUs % 3600000000) / 60000000);
+    const seconds = Math.floor((totalUs % 60000000) / 1000000);
+    const ms      = Math.floor((totalUs % 1000000) / 1000);
+    const us      = totalUs % 1000;
+    const elapsed = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${ms.toString().padStart(3,'0')}.${us.toString().padStart(3,'0')}`;
+
+    if (!liveData[signal]) liveData[signal] = { points: [], rows: [] };
+
+    const now = new Date().getTime();
+    liveData[signal].points.push({ x: now, y: parsed.value });
+    liveData[signal].rows.unshift({ 
+        time: timeStr,   // decoder timestamp HH:MM:SS.mmm
+        elapsed: elapsed, // microsecond precision elapsed
+        val: parsed.value, 
+        ts: now 
+    });
+
+    if (chart && STATS[currentStat] && STATS[currentStat].label === signal) {
+        chart.appendData([{ data: [{ x: now, y: parsed.value }] }]);
+
+        const firstPoint = liveData[signal].points[0].x;
+        const windowEnd = Math.max(now, firstPoint + 0.5 * 60 * 1000);
+        chart.updateOptions({
+            xaxis: {
+                min: windowEnd - 0.5 * 60 * 1000,
+                max: windowEnd
+            }
+        }, false, false);
+
+        currentRows = liveData[signal].rows;
+        renderTable();
+    }
+});
+
+  /*
+  socket.on("can_data", function(msg) {
+      const parsed = JSON.parse(msg.data);
+      const now = new Date().getTime();
+      
+      if (!sessionStart) sessionStart = now;
+      
+      const pad = n => n.toString().padStart(2,'0');
+      const d = new Date(now);
+      const timeStr = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+      const elapsedSec = Math.floor((now - sessionStart) / 1000);
+      const elapsed = `${pad(Math.floor(elapsedSec/3600))}:${pad(Math.floor((elapsedSec%3600)/60))}:${pad(elapsedSec%60)}`;
+
+      const signal = parsed.signal;
+      if (!liveData[signal]) liveData[signal] = { points: [], rows: [] };
+      
+      liveData[signal].points.push({ x: now, y: parsed.value });
+      liveData[signal].rows.unshift({ time: timeStr, elapsed: elapsed, val: parsed.value, ts: now });
+
+      // Only update chart if this signal is currently selected
+      if (chart && STATS[currentStat] && STATS[currentStat].label === signal) {
+          chart.appendData([{ data: [{ x: now, y: parsed.value }] }]);
+          
+          // Slide window: show 2 minutes from first point
+          const firstPoint = liveData[signal].points[0].x;
+          const windowEnd = Math.max(now, firstPoint + 0.5 * 60 * 1000);
+          chart.updateOptions({
+              xaxis: {
+                  min: windowEnd - 0.5 * 60 * 1000,
+                  max: windowEnd
+              }
+          }, false, false);
+          
+          currentRows = liveData[signal].rows;
+          renderTable();
+      }
+  }); */
+        
+    
+</script>
+
+
+</body></html>

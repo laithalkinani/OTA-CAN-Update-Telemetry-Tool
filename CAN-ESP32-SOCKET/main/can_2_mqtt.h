@@ -12,7 +12,7 @@
 #define TWAI_BITRATE    500000
 #define CAN_2_MQTT_BUFFER_SIZE 32
 
-
+/*  This is a custom struct, based on the twai_fra*/
 typedef struct __attribute__((packed))      //forcing the header to be packed, to make parsing easier down the line
 {
     uint32_t id;

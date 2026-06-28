@@ -14,9 +14,9 @@
 #include "esp_log.h"
 #include "esp_netif.h"
 #include "esp_event.h"
-#include "mcp2515_driver.h"
 #include "wifi_stuff.h"
 #include "can_2_mqtt.h"
+#include "mqtt_stuff.h"
 
 
 void app_main(void)
@@ -26,8 +26,14 @@ ESP_ERROR_CHECK(esp_netif_init());
 ESP_ERROR_CHECK(nvs_flash_init());
 ESP_ERROR_CHECK(esp_event_loop_create_default());
 
+/*initialize the wifi station*/
 initWifiSta();
 
-xTaskCreate(can_2_mqtt_task, "can_2_mqtt_task", 4096, NULL, 5, NULL);
+/*initialize MQTT client*/
+static can_2_mqtt_task_params_t mqttParams;
+mqttParams.mqtt_client = initMqtt();
+
+/*start the can_2_mqtt task*/
+xTaskCreate(can_2_mqtt_task, "can_2_mqtt_task", 4096, &mqttParams, 5, NULL);
 
 }

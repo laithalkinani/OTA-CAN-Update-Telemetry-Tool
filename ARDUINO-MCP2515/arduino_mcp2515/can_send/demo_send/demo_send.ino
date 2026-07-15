@@ -3,6 +3,8 @@
 /*Constants*/
 #define ADC_MIN ((uint16_t)0)
 #define ADC_MAX ((uint16_t)1023)
+#define ADC_OPEN   ((uint16_t)890)   // throttle fully closed (rest position)
+#define ADC_CLOSED ((uint16_t)830)   // throttle fully pressed
 #define MAX_ERPM ((uint32_t)50000)
 #define MIN_MOTOR_TEMP ((float)20.0)
 #define MAX_MOTOR_TEMP ((float)90.0)
@@ -139,8 +141,9 @@ void loop() {
   
 
   uint16_t potValue = analogRead(potPin);
-  potValue = constrain(potValue, ADC_MIN, ADC_MAX);
-  throttlePct = map(potValue, ADC_MIN, ADC_MAX, 0, 100);
+  /*note: the 3d printed throttle used for the demo is constrained between 890->815 adc values*/
+  potValue = constrain(potValue, ADC_CLOSED, ADC_OPEN);           // constrain needs (value, low, high) — 815 < 890, so this order is correct
+  throttlePct = map(potValue, ADC_OPEN, ADC_CLOSED, 0, 100);      // reversed input range: 890->0%, 815->100%
 
   /*  Logic: as throttle opens, pack current increases, and temperature increases. when throttle stays the same, temp stabilizes, pack current stabilizes. 
       Closing throttle reduces pack current by same proportion, and temp also falls to normal.

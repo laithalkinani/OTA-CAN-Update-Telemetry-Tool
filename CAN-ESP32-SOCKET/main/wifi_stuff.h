@@ -9,7 +9,7 @@ Author: Laith Al-Kinani
 
 
 
-#define WIFI_STATUS_LED     18
+#define WIFI_STATUS_LED     14
 
 
 void initWifiSta(void);

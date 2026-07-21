@@ -7,11 +7,13 @@
 #include "esp_twai_onchip.h"
 #include "can_2_mqtt.h"
 #include "mqtt_stuff.h"
+#include "driver/gpio.h"
 
 static const char* TAG = "CAN_2_MQTT_TASK";
 static twai_node_handle_t node_hdl = NULL;
 static rx_msg_buffer_t rx_buffer;       //rx_buffer is the global "glue" buffer between ISR and task, contains header and payload
 static QueueHandle_t can_2_mqtt_queue = NULL;
+static uint8_t canErrorFlag = 0;
 
 /*  Forward Declaration of callback  */
 
@@ -73,6 +75,7 @@ void twai_init()
     uint64_t sizeOfCanFrame = sizeof(rx_buffer);
     ESP_LOGI(TAG, "Size of CAN Frame is: %llu", sizeOfCanFrame);
 
+    gpio_set_direction(CAN_ERROR_LED, GPIO_MODE_OUTPUT);
 
 }
 
@@ -90,6 +93,7 @@ static bool IRAM_ATTR twai_rx_done_callback(twai_node_handle_t handle,
     /* we need to copy every header field individually, to enforce bitpacking, which makes parsing easier*/
     if (twai_node_receive_from_isr(handle, &rx_frame) == ESP_OK)
     {
+        canErrorFlag = 0;
         rx_buffer.header.id        = rx_frame.header.id;
         rx_buffer.header.dlc       = rx_frame.header.dlc;
         rx_buffer.header.flags     = (rx_frame.header.ide & 0x1)
@@ -101,6 +105,10 @@ static bool IRAM_ATTR twai_rx_done_callback(twai_node_handle_t handle,
 
         xQueueSendFromISR(can_2_mqtt_queue, &rx_buffer, &higher_prio_woken);
     }
+    else 
+        {
+            canErrorFlag = 1;
+        }
 
     return (higher_prio_woken == pdTRUE);
 }
@@ -156,6 +164,15 @@ void can_2_mqtt_task(void *pvParameters)
 
     can_2_mqtt_task_params_t *mqttParams = (can_2_mqtt_task_params_t*)pvParameters;     //unlock the passed params
     esp_mqtt_client_handle_t mqttClient = mqttParams->mqtt_client;  //now we can use mqttClient as a reference
+
+    if (canErrorFlag)
+    {
+        gpio_set_level(CAN_ERROR_LED, 1);
+    }
+    else
+    {
+        gpio_set_level(CAN_ERROR_LED, 0);
+    }
 
        while(1)
     {

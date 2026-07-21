@@ -13,7 +13,7 @@ static const char* TAG = "CAN_2_MQTT_TASK";
 static twai_node_handle_t node_hdl = NULL;
 static rx_msg_buffer_t rx_buffer;       //rx_buffer is the global "glue" buffer between ISR and task, contains header and payload
 static QueueHandle_t can_2_mqtt_queue = NULL;
-static uint8_t canErrorFlag = 0;
+static volatile uint8_t canErrorFlag = 0;
 
 /*  Forward Declaration of callback  */
 
@@ -165,17 +165,9 @@ void can_2_mqtt_task(void *pvParameters)
     can_2_mqtt_task_params_t *mqttParams = (can_2_mqtt_task_params_t*)pvParameters;     //unlock the passed params
     esp_mqtt_client_handle_t mqttClient = mqttParams->mqtt_client;  //now we can use mqttClient as a reference
 
-    if (canErrorFlag)
-    {
-        gpio_set_level(CAN_ERROR_LED, 1);
-    }
-    else
-    {
-        gpio_set_level(CAN_ERROR_LED, 0);
-    }
-
        while(1)
     {
+        gpio_set_level(CAN_ERROR_LED, canErrorFlag ? 1 : 0);    //checks and sets can error led 
         /*  Block until a frame arrives from ISR   */
         if (xQueueReceive(can_2_mqtt_queue, &mqttBuffer[currentMqttBufferIndex], portMAX_DELAY) == pdTRUE)
         {

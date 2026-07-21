@@ -119,6 +119,17 @@ float returnAccel(uint8_t throttle, float currentRpm)
   return netAccel;
 }
 
+//simple averging filter just to reduce spiky noise
+uint16_t readPotAveraged() 
+{
+  const uint8_t numSamples = 8;
+  uint32_t sum = 0;
+  for (uint8_t i = 0; i < numSamples; i++) {
+    sum += analogRead(potPin);
+  }
+  return sum / numSamples;
+}
+
 void setup() 
 {
   Serial.begin(115200);
@@ -140,7 +151,7 @@ void loop() {
   lastMillis = now;   //next timestep
   
 
-  uint16_t potValue = analogRead(potPin);
+  uint16_t potValue = readPotAveraged();
   /*note: the 3d printed throttle used for the demo is constrained between 890->815 adc values*/
   potValue = constrain(potValue, ADC_CLOSED, ADC_OPEN);           // constrain needs (value, low, high) — 815 < 890, so this order is correct
   throttlePct = map(potValue, ADC_OPEN, ADC_CLOSED, 0, 100);      // reversed input range: 890->0%, 815->100%

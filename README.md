@@ -97,7 +97,7 @@ One of our justifications for using FreeRTOS was that we could easily port the f
 Right now the device connects to a phone's hotspot for an LTE/5G connection. This is...easy... but if we want to take this to the next level, the hardware and firmware should be modified to connect to a carrier. This is detailed a bit more in the report, but for our project was way out of scope, so it will be cool to see in future iterations.
 
 ### HiveMQ
-HiveMQ as our broker and temporary data storage is cool because it's easy and reliable. No reason to change this, only if you're extremely bored. But the alternative idea is hosting our own broker and server on a separate device like an RPi.
+HiveMQ as our broker and temporary data storage is cool because it's easy and reliable. No reason to change this, only if you're extremely bored. The alternative idea is hosting our own broker and server on a separate device like an RPi, but then you'd have to deal with port-forwarding and other stuff which made it a pain in the butt.
 
 
 
